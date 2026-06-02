@@ -1,0 +1,5082 @@
+{
+  "modele": "Ensemble Phase 2 — v13 (AMÉLIORATIONS MAJEURES)",
+  "version": "v13",
+  "nouveautes_v13": [
+    "Plages horaires corrigées (matin: 7h-11h au lieu de 7h-12h)",
+    "Biais directionnel pour types sensibles (OTP/Transaction → matin forcé)",
+    "SMOTE activé avec ratio 0.6",
+    "Calibration des probabilités (isotonic)",
+    "Feature selection : 56 features retenues",
+    "Régularisation L1 renforcée (0.15 → 0.30)",
+    "Seuils adaptatifs par type NLP"
+  ],
+  "methode_timing": {
+    "formule": "final_score(h) = model_score_norm^α × time_score_norm(h,type)^(1-α)",
+    "alpha": 0.5,
+    "threshold_pct": 0.95,
+    "min_gap_h": 1,
+    "max_gap_h": 4,
+    "min_obs_normal": 30,
+    "min_obs_rare": 15,
+    "flat_curve_threshold": 1.05,
+    "allowed_hours": "7h–23h",
+    "rare_types": [
+      "Felicitation",
+      "Recrutement",
+      "Recharge_Telecom",
+      "Location_Vente",
+      "Livraison"
+    ],
+    "morning_priority_types": [
+      "Alerte",
+      "OTP",
+      "Transaction"
+    ],
+    "evening_priority_types": [
+      "Livraison",
+      "Promotion"
+    ],
+    "hour_ranges_v13": {
+      "matin": [
+        7,
+        11
+      ],
+      "apres_m": [
+        12,
+        16
+      ],
+      "soir": [
+        17,
+        22
+      ],
+      "nuit": [
+        23,
+        6
+      ]
+    }
+  },
+  "models_used": [
+    "xgb"
+  ],
+  "calibration": true,
+  "feature_selection": {
+    "enabled": true,
+    "n_features_selected": 56,
+    "n_features_original": 91
+  },
+  "individual_aucs": {
+    "xgb": 0.8128
+  },
+  "ensemble_method": "single",
+  "n_features": 56,
+  "metriques": {
+    "auc_roc": 0.8128,
+    "pr_auc": 0.7684,
+    "auc_cv_mean": 0.8127,
+    "auc_cv_std": 0.0034,
+    "coherence_timing": "4/5",
+    "ablation": {
+      "auc_phase1": 0.5684,
+      "auc_sans_msisdn": 0.8028,
+      "auc_sans_target_enc": 0.5986,
+      "auc_sans_nlp_v8": 0.8134,
+      "auc_complet": 0.8128,
+      "gain_total": 24.44
+    },
+    "seuils": [
+      {
+        "label": "Seuil 0.500",
+        "accuracy": 0.7407,
+        "precision": 0.8713,
+        "recall": 0.3892,
+        "f1": 0.538
+      },
+      {
+        "label": "F1 opt (0.339)",
+        "accuracy": 0.6494,
+        "precision": 0.5286,
+        "recall": 0.8918,
+        "f1": 0.6637
+      },
+      {
+        "label": "Prec>=0.60 (0.384)",
+        "accuracy": 0.7054,
+        "precision": 0.6007,
+        "recall": 0.718,
+        "f1": 0.6541
+      },
+      {
+        "label": "Prec>=0.70 (0.417)",
+        "accuracy": 0.734,
+        "precision": 0.7016,
+        "recall": 0.5472,
+        "f1": 0.6148
+      }
+    ],
+    "seuils_adaptatifs_par_type": {}
+  },
+  "feature_importance_top20": [
+    {
+      "feature": "smsc_name_target_loo",
+      "importance": 0.4648222327232361,
+      "source": "TargetEnc"
+    },
+    {
+      "feature": "smsc_name_enc",
+      "importance": 0.17462852597236633,
+      "source": "Phase1"
+    },
+    {
+      "feature": "sensitive_x_morning",
+      "importance": 0.015260378830134869,
+      "source": "Interaction"
+    },
+    {
+      "feature": "urgency_score",
+      "importance": 0.009743341244757175,
+      "source": "NLP_base"
+    },
+    {
+      "feature": "is_nuit",
+      "importance": 0.009686491452157497,
+      "source": "Phase1"
+    },
+    {
+      "feature": "sms_fatigue_penalty",
+      "importance": 0.009320816025137901,
+      "source": "Phase1"
+    },
+    {
+      "feature": "nlp_text_mult",
+      "importance": 0.00918721966445446,
+      "source": "NLP_v8"
+    },
+    {
+      "feature": "sms_last_24h",
+      "importance": 0.009134734980762005,
+      "source": "Phase1"
+    },
+    {
+      "feature": "is_soir",
+      "importance": 0.008590965531766415,
+      "source": "Phase1"
+    },
+    {
+      "feature": "type_OTP",
+      "importance": 0.00839772168546915,
+      "source": "OHE_type"
+    },
+    {
+      "feature": "is_weekend",
+      "importance": 0.007680688053369522,
+      "source": "Phase1"
+    },
+    {
+      "feature": "type_Location_Vente",
+      "importance": 0.007495279423892498,
+      "source": "OHE_type"
+    },
+    {
+      "feature": "urgent_x_hour",
+      "importance": 0.007485711481422186,
+      "source": "Interaction"
+    },
+    {
+      "feature": "is_promo",
+      "importance": 0.007348197977989912,
+      "source": "NLP_base"
+    },
+    {
+      "feature": "msisdn_tier",
+      "importance": 0.007339949253946543,
+      "source": "MSISDN"
+    },
+    {
+      "feature": "msisdn_rate_squared",
+      "importance": 0.007124126423150301,
+      "source": "MSISDN"
+    },
+    {
+      "feature": "type_Livraison",
+      "importance": 0.007105493452399969,
+      "source": "OHE_type"
+    },
+    {
+      "feature": "is_peak",
+      "importance": 0.007103809621185064,
+      "source": "Phase1"
+    },
+    {
+      "feature": "domain_Banque",
+      "importance": 0.007030816748738289,
+      "source": "OHE_domain"
+    },
+    {
+      "feature": "msisdn_engagement_rate",
+      "importance": 0.0068982066586613655,
+      "source": "MSISDN"
+    }
+  ],
+  "timing_results": [
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Orange",
+      "nlp_type": "Promotion",
+      "best_hour": 17,
+      "window_start": 17,
+      "window_end": 19,
+      "window_label": "17h–19h",
+      "method": "evening_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0928,
+      "hybrid_score_peak": 1.0453,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.282,
+          "time_score_norm": 0.7269,
+          "hybrid_score_norm": 0.8526
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.3089,
+          "time_score_norm": 0.7962,
+          "hybrid_score_norm": 0.8923
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.267,
+          "time_score_norm": 0.6881,
+          "hybrid_score_norm": 0.8295
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2418,
+          "time_score_norm": 0.6231,
+          "hybrid_score_norm": 0.7894
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.3597,
+          "time_score_norm": 0.9271,
+          "hybrid_score_norm": 0.9629
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3027,
+          "time_score_norm": 0.7802,
+          "hybrid_score_norm": 0.8833
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.2883,
+          "time_score_norm": 0.743,
+          "hybrid_score_norm": 0.862
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.384,
+          "time_score_norm": 0.9897,
+          "hybrid_score_norm": 0.9948
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.2832,
+          "time_score_norm": 0.7299,
+          "hybrid_score_norm": 0.8544
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3071,
+          "time_score_norm": 0.7915,
+          "hybrid_score_norm": 0.8897
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0928,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.4015,
+          "time_score_norm": 1.0349,
+          "hybrid_score_norm": 1.0173
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.4014,
+          "time_score_norm": 1.0345,
+          "hybrid_score_norm": 1.0171
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.4028,
+          "time_score_norm": 1.0381,
+          "hybrid_score_norm": 1.0189
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3984,
+          "time_score_norm": 1.0269,
+          "hybrid_score_norm": 1.0133
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.4088,
+          "time_score_norm": 1.0536,
+          "hybrid_score_norm": 1.0265
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Orange",
+      "nlp_type": "OTP",
+      "best_hour": 8,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.2965,
+      "hybrid_score_peak": 1.1268,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.4379,
+          "time_score_norm": 1.1286,
+          "hybrid_score_norm": 1.0624
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.401,
+          "time_score_norm": 1.0336,
+          "hybrid_score_norm": 1.0166
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4926,
+          "time_score_norm": 1.2697,
+          "hybrid_score_norm": 1.1268
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4532,
+          "time_score_norm": 1.168,
+          "hybrid_score_norm": 1.0807
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.482,
+          "time_score_norm": 1.2423,
+          "hybrid_score_norm": 1.1146
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4841,
+          "time_score_norm": 1.2477,
+          "hybrid_score_norm": 1.117
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.5031,
+          "time_score_norm": 1.2965,
+          "hybrid_score_norm": 1.1387
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3949,
+          "time_score_norm": 1.0177,
+          "hybrid_score_norm": 1.0088
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.4441,
+          "time_score_norm": 1.1445,
+          "hybrid_score_norm": 1.0698
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.4485,
+          "time_score_norm": 1.156,
+          "hybrid_score_norm": 1.0752
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3976,
+          "time_score_norm": 1.0248,
+          "hybrid_score_norm": 1.0123
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2672,
+          "time_score_norm": 0.6886,
+          "hybrid_score_norm": 0.8298
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.333,
+          "time_score_norm": 0.8584,
+          "hybrid_score_norm": 0.9265
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2311,
+          "time_score_norm": 0.5955,
+          "hybrid_score_norm": 0.7717
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2594,
+          "time_score_norm": 0.6685,
+          "hybrid_score_norm": 0.8176
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3507,
+          "time_score_norm": 0.9039,
+          "hybrid_score_norm": 0.9507
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.2951,
+          "time_score_norm": 0.7606,
+          "hybrid_score_norm": 0.8721
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Orange",
+      "nlp_type": "Transaction",
+      "best_hour": 10,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0927,
+      "hybrid_score_peak": 1.0405,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.395,
+          "time_score_norm": 1.018,
+          "hybrid_score_norm": 1.009
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2873,
+          "time_score_norm": 0.7404,
+          "hybrid_score_norm": 0.8605
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3935,
+          "time_score_norm": 1.0141,
+          "hybrid_score_norm": 1.007
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0825,
+          "hybrid_score_norm": 1.0404
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4194,
+          "time_score_norm": 1.0809,
+          "hybrid_score_norm": 1.0397
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0826,
+          "hybrid_score_norm": 1.0405
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.408,
+          "time_score_norm": 1.0515,
+          "hybrid_score_norm": 1.0254
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0927,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3744,
+          "time_score_norm": 0.965,
+          "hybrid_score_norm": 0.9823
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3642,
+          "time_score_norm": 0.9388,
+          "hybrid_score_norm": 0.9689
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3359,
+          "time_score_norm": 0.8658,
+          "hybrid_score_norm": 0.9305
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3937,
+          "time_score_norm": 1.0147,
+          "hybrid_score_norm": 1.0073
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2728,
+          "time_score_norm": 0.703,
+          "hybrid_score_norm": 0.8384
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.2721,
+          "time_score_norm": 0.7013,
+          "hybrid_score_norm": 0.8374
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2555,
+          "time_score_norm": 0.6584,
+          "hybrid_score_norm": 0.8114
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2303,
+          "time_score_norm": 0.5935,
+          "hybrid_score_norm": 0.7704
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3168,
+          "time_score_norm": 0.8164,
+          "hybrid_score_norm": 0.9036
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.314,
+          "time_score_norm": 0.8092,
+          "hybrid_score_norm": 0.8995
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Orange",
+      "nlp_type": "Alerte",
+      "best_hour": 9,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.254,
+      "hybrid_score_peak": 1.1198,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.4642,
+          "time_score_norm": 1.1964,
+          "hybrid_score_norm": 1.0938
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4747,
+          "time_score_norm": 1.2235,
+          "hybrid_score_norm": 1.1061
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4865,
+          "time_score_norm": 1.254,
+          "hybrid_score_norm": 1.1198
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.4844,
+          "time_score_norm": 1.2484,
+          "hybrid_score_norm": 1.1173
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4266,
+          "time_score_norm": 1.0994,
+          "hybrid_score_norm": 1.0485
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.4789,
+          "time_score_norm": 1.2343,
+          "hybrid_score_norm": 1.111
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.4076,
+          "time_score_norm": 1.0504,
+          "hybrid_score_norm": 1.0249
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3693,
+          "time_score_norm": 0.9517,
+          "hybrid_score_norm": 0.9756
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.381,
+          "time_score_norm": 0.982,
+          "hybrid_score_norm": 0.991
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.4546,
+          "time_score_norm": 1.1715,
+          "hybrid_score_norm": 1.0824
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2991,
+          "time_score_norm": 0.771,
+          "hybrid_score_norm": 0.878
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3384,
+          "time_score_norm": 0.8721,
+          "hybrid_score_norm": 0.9338
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2766,
+          "time_score_norm": 0.7129,
+          "hybrid_score_norm": 0.8444
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3875,
+          "time_score_norm": 0.9988,
+          "hybrid_score_norm": 0.9994
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3698,
+          "time_score_norm": 0.953,
+          "hybrid_score_norm": 0.9762
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3327,
+          "time_score_norm": 0.8574,
+          "hybrid_score_norm": 0.926
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3686,
+          "time_score_norm": 0.9501,
+          "hybrid_score_norm": 0.9747
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Orange",
+      "nlp_type": "Livraison",
+      "best_hour": 19,
+      "window_start": 15,
+      "window_end": 20,
+      "window_label": "15h–20h",
+      "method": "fallback_posthoc",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0034,
+      "hybrid_score_peak": 1.0017,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3088,
+          "time_score_norm": 0.7957,
+          "hybrid_score_norm": 0.892
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.285,
+          "time_score_norm": 0.7345,
+          "hybrid_score_norm": 0.8571
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.2506,
+          "time_score_norm": 0.6459,
+          "hybrid_score_norm": 0.8037
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2895,
+          "time_score_norm": 0.7462,
+          "hybrid_score_norm": 0.8638
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.2039,
+          "time_score_norm": 0.5256,
+          "hybrid_score_norm": 0.725
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3146,
+          "time_score_norm": 0.8108,
+          "hybrid_score_norm": 0.9005
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3137,
+          "time_score_norm": 0.8084,
+          "hybrid_score_norm": 0.8991
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.228,
+          "time_score_norm": 0.5876,
+          "hybrid_score_norm": 0.7666
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3622,
+          "time_score_norm": 0.9336,
+          "hybrid_score_norm": 0.9662
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3034,
+          "time_score_norm": 0.782,
+          "hybrid_score_norm": 0.8843
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.3844,
+          "time_score_norm": 0.9907,
+          "hybrid_score_norm": 0.9953
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3331,
+          "time_score_norm": 0.8586,
+          "hybrid_score_norm": 0.9266
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.3893,
+          "time_score_norm": 1.0034,
+          "hybrid_score_norm": 1.0017
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3422,
+          "time_score_norm": 0.882,
+          "hybrid_score_norm": 0.9391
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3637,
+          "time_score_norm": 0.9373,
+          "hybrid_score_norm": 0.9681
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3214,
+          "time_score_norm": 0.8283,
+          "hybrid_score_norm": 0.9101
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2771,
+          "time_score_norm": 0.7143,
+          "hybrid_score_norm": 0.8452
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Ooredoo",
+      "nlp_type": "Promotion",
+      "best_hour": 17,
+      "window_start": 17,
+      "window_end": 19,
+      "window_label": "17h–19h",
+      "method": "evening_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0928,
+      "hybrid_score_peak": 1.0453,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.282,
+          "time_score_norm": 0.7269,
+          "hybrid_score_norm": 0.8526
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.3089,
+          "time_score_norm": 0.7962,
+          "hybrid_score_norm": 0.8923
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.267,
+          "time_score_norm": 0.6881,
+          "hybrid_score_norm": 0.8295
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2418,
+          "time_score_norm": 0.6231,
+          "hybrid_score_norm": 0.7894
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.3597,
+          "time_score_norm": 0.9271,
+          "hybrid_score_norm": 0.9629
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3027,
+          "time_score_norm": 0.7802,
+          "hybrid_score_norm": 0.8833
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.2883,
+          "time_score_norm": 0.743,
+          "hybrid_score_norm": 0.862
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.384,
+          "time_score_norm": 0.9897,
+          "hybrid_score_norm": 0.9948
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.2832,
+          "time_score_norm": 0.7299,
+          "hybrid_score_norm": 0.8544
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3071,
+          "time_score_norm": 0.7915,
+          "hybrid_score_norm": 0.8897
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0928,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.4015,
+          "time_score_norm": 1.0349,
+          "hybrid_score_norm": 1.0173
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.4014,
+          "time_score_norm": 1.0345,
+          "hybrid_score_norm": 1.0171
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.4028,
+          "time_score_norm": 1.0381,
+          "hybrid_score_norm": 1.0189
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3984,
+          "time_score_norm": 1.0269,
+          "hybrid_score_norm": 1.0133
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.4088,
+          "time_score_norm": 1.0536,
+          "hybrid_score_norm": 1.0265
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Ooredoo",
+      "nlp_type": "OTP",
+      "best_hour": 8,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.2965,
+      "hybrid_score_peak": 1.1268,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.4379,
+          "time_score_norm": 1.1286,
+          "hybrid_score_norm": 1.0624
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.401,
+          "time_score_norm": 1.0336,
+          "hybrid_score_norm": 1.0166
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4926,
+          "time_score_norm": 1.2697,
+          "hybrid_score_norm": 1.1268
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4532,
+          "time_score_norm": 1.168,
+          "hybrid_score_norm": 1.0807
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.482,
+          "time_score_norm": 1.2423,
+          "hybrid_score_norm": 1.1146
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4841,
+          "time_score_norm": 1.2477,
+          "hybrid_score_norm": 1.117
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.5031,
+          "time_score_norm": 1.2965,
+          "hybrid_score_norm": 1.1387
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3949,
+          "time_score_norm": 1.0177,
+          "hybrid_score_norm": 1.0088
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.4441,
+          "time_score_norm": 1.1445,
+          "hybrid_score_norm": 1.0698
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.4485,
+          "time_score_norm": 1.156,
+          "hybrid_score_norm": 1.0752
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3976,
+          "time_score_norm": 1.0248,
+          "hybrid_score_norm": 1.0123
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2672,
+          "time_score_norm": 0.6886,
+          "hybrid_score_norm": 0.8298
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.333,
+          "time_score_norm": 0.8584,
+          "hybrid_score_norm": 0.9265
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2311,
+          "time_score_norm": 0.5955,
+          "hybrid_score_norm": 0.7717
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2594,
+          "time_score_norm": 0.6685,
+          "hybrid_score_norm": 0.8176
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3507,
+          "time_score_norm": 0.9039,
+          "hybrid_score_norm": 0.9507
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.2951,
+          "time_score_norm": 0.7606,
+          "hybrid_score_norm": 0.8721
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Ooredoo",
+      "nlp_type": "Transaction",
+      "best_hour": 10,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0927,
+      "hybrid_score_peak": 1.0405,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.395,
+          "time_score_norm": 1.018,
+          "hybrid_score_norm": 1.009
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2873,
+          "time_score_norm": 0.7404,
+          "hybrid_score_norm": 0.8605
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3935,
+          "time_score_norm": 1.0141,
+          "hybrid_score_norm": 1.007
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0825,
+          "hybrid_score_norm": 1.0404
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4194,
+          "time_score_norm": 1.0809,
+          "hybrid_score_norm": 1.0397
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0826,
+          "hybrid_score_norm": 1.0405
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.408,
+          "time_score_norm": 1.0515,
+          "hybrid_score_norm": 1.0254
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0927,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3744,
+          "time_score_norm": 0.965,
+          "hybrid_score_norm": 0.9823
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3642,
+          "time_score_norm": 0.9388,
+          "hybrid_score_norm": 0.9689
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3359,
+          "time_score_norm": 0.8658,
+          "hybrid_score_norm": 0.9305
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3937,
+          "time_score_norm": 1.0147,
+          "hybrid_score_norm": 1.0073
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2728,
+          "time_score_norm": 0.703,
+          "hybrid_score_norm": 0.8384
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.2721,
+          "time_score_norm": 0.7013,
+          "hybrid_score_norm": 0.8374
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2555,
+          "time_score_norm": 0.6584,
+          "hybrid_score_norm": 0.8114
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2303,
+          "time_score_norm": 0.5935,
+          "hybrid_score_norm": 0.7704
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3168,
+          "time_score_norm": 0.8164,
+          "hybrid_score_norm": 0.9036
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.314,
+          "time_score_norm": 0.8092,
+          "hybrid_score_norm": 0.8995
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Ooredoo",
+      "nlp_type": "Alerte",
+      "best_hour": 9,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.254,
+      "hybrid_score_peak": 1.1198,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.4642,
+          "time_score_norm": 1.1964,
+          "hybrid_score_norm": 1.0938
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4747,
+          "time_score_norm": 1.2235,
+          "hybrid_score_norm": 1.1061
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4865,
+          "time_score_norm": 1.254,
+          "hybrid_score_norm": 1.1198
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.4844,
+          "time_score_norm": 1.2484,
+          "hybrid_score_norm": 1.1173
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4266,
+          "time_score_norm": 1.0994,
+          "hybrid_score_norm": 1.0485
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.4789,
+          "time_score_norm": 1.2343,
+          "hybrid_score_norm": 1.111
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.4076,
+          "time_score_norm": 1.0504,
+          "hybrid_score_norm": 1.0249
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3693,
+          "time_score_norm": 0.9517,
+          "hybrid_score_norm": 0.9756
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.381,
+          "time_score_norm": 0.982,
+          "hybrid_score_norm": 0.991
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.4546,
+          "time_score_norm": 1.1715,
+          "hybrid_score_norm": 1.0824
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2991,
+          "time_score_norm": 0.771,
+          "hybrid_score_norm": 0.878
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3384,
+          "time_score_norm": 0.8721,
+          "hybrid_score_norm": 0.9338
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2766,
+          "time_score_norm": 0.7129,
+          "hybrid_score_norm": 0.8444
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3875,
+          "time_score_norm": 0.9988,
+          "hybrid_score_norm": 0.9994
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3698,
+          "time_score_norm": 0.953,
+          "hybrid_score_norm": 0.9762
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3327,
+          "time_score_norm": 0.8574,
+          "hybrid_score_norm": 0.926
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3686,
+          "time_score_norm": 0.9501,
+          "hybrid_score_norm": 0.9747
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Ooredoo",
+      "nlp_type": "Livraison",
+      "best_hour": 19,
+      "window_start": 15,
+      "window_end": 20,
+      "window_label": "15h–20h",
+      "method": "fallback_posthoc",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0034,
+      "hybrid_score_peak": 1.0017,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3088,
+          "time_score_norm": 0.7957,
+          "hybrid_score_norm": 0.892
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.285,
+          "time_score_norm": 0.7345,
+          "hybrid_score_norm": 0.8571
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.2506,
+          "time_score_norm": 0.6459,
+          "hybrid_score_norm": 0.8037
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2895,
+          "time_score_norm": 0.7462,
+          "hybrid_score_norm": 0.8638
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.2039,
+          "time_score_norm": 0.5256,
+          "hybrid_score_norm": 0.725
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3146,
+          "time_score_norm": 0.8108,
+          "hybrid_score_norm": 0.9005
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3137,
+          "time_score_norm": 0.8084,
+          "hybrid_score_norm": 0.8991
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.228,
+          "time_score_norm": 0.5876,
+          "hybrid_score_norm": 0.7666
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3622,
+          "time_score_norm": 0.9336,
+          "hybrid_score_norm": 0.9662
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3034,
+          "time_score_norm": 0.782,
+          "hybrid_score_norm": 0.8843
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.3844,
+          "time_score_norm": 0.9907,
+          "hybrid_score_norm": 0.9953
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3331,
+          "time_score_norm": 0.8586,
+          "hybrid_score_norm": 0.9266
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.3893,
+          "time_score_norm": 1.0034,
+          "hybrid_score_norm": 1.0017
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3422,
+          "time_score_norm": 0.882,
+          "hybrid_score_norm": 0.9391
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3637,
+          "time_score_norm": 0.9373,
+          "hybrid_score_norm": 0.9681
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3214,
+          "time_score_norm": 0.8283,
+          "hybrid_score_norm": 0.9101
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2771,
+          "time_score_norm": 0.7143,
+          "hybrid_score_norm": 0.8452
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Telecom",
+      "nlp_type": "Promotion",
+      "best_hour": 17,
+      "window_start": 17,
+      "window_end": 19,
+      "window_label": "17h–19h",
+      "method": "evening_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0928,
+      "hybrid_score_peak": 1.0453,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.282,
+          "time_score_norm": 0.7269,
+          "hybrid_score_norm": 0.8526
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.3089,
+          "time_score_norm": 0.7962,
+          "hybrid_score_norm": 0.8923
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.267,
+          "time_score_norm": 0.6881,
+          "hybrid_score_norm": 0.8295
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2418,
+          "time_score_norm": 0.6231,
+          "hybrid_score_norm": 0.7894
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.3597,
+          "time_score_norm": 0.9271,
+          "hybrid_score_norm": 0.9629
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3027,
+          "time_score_norm": 0.7802,
+          "hybrid_score_norm": 0.8833
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.2883,
+          "time_score_norm": 0.743,
+          "hybrid_score_norm": 0.862
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.384,
+          "time_score_norm": 0.9897,
+          "hybrid_score_norm": 0.9948
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.2832,
+          "time_score_norm": 0.7299,
+          "hybrid_score_norm": 0.8544
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3071,
+          "time_score_norm": 0.7915,
+          "hybrid_score_norm": 0.8897
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0928,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.4015,
+          "time_score_norm": 1.0349,
+          "hybrid_score_norm": 1.0173
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.4014,
+          "time_score_norm": 1.0345,
+          "hybrid_score_norm": 1.0171
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.4028,
+          "time_score_norm": 1.0381,
+          "hybrid_score_norm": 1.0189
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3984,
+          "time_score_norm": 1.0269,
+          "hybrid_score_norm": 1.0133
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.4088,
+          "time_score_norm": 1.0536,
+          "hybrid_score_norm": 1.0265
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Telecom",
+      "nlp_type": "OTP",
+      "best_hour": 8,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.2965,
+      "hybrid_score_peak": 1.1268,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.4379,
+          "time_score_norm": 1.1286,
+          "hybrid_score_norm": 1.0624
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.401,
+          "time_score_norm": 1.0336,
+          "hybrid_score_norm": 1.0166
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4926,
+          "time_score_norm": 1.2697,
+          "hybrid_score_norm": 1.1268
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4532,
+          "time_score_norm": 1.168,
+          "hybrid_score_norm": 1.0807
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.482,
+          "time_score_norm": 1.2423,
+          "hybrid_score_norm": 1.1146
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4841,
+          "time_score_norm": 1.2477,
+          "hybrid_score_norm": 1.117
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.5031,
+          "time_score_norm": 1.2965,
+          "hybrid_score_norm": 1.1387
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3949,
+          "time_score_norm": 1.0177,
+          "hybrid_score_norm": 1.0088
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.4441,
+          "time_score_norm": 1.1445,
+          "hybrid_score_norm": 1.0698
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.4485,
+          "time_score_norm": 1.156,
+          "hybrid_score_norm": 1.0752
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3976,
+          "time_score_norm": 1.0248,
+          "hybrid_score_norm": 1.0123
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2672,
+          "time_score_norm": 0.6886,
+          "hybrid_score_norm": 0.8298
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.333,
+          "time_score_norm": 0.8584,
+          "hybrid_score_norm": 0.9265
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2311,
+          "time_score_norm": 0.5955,
+          "hybrid_score_norm": 0.7717
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2594,
+          "time_score_norm": 0.6685,
+          "hybrid_score_norm": 0.8176
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3507,
+          "time_score_norm": 0.9039,
+          "hybrid_score_norm": 0.9507
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.2951,
+          "time_score_norm": 0.7606,
+          "hybrid_score_norm": 0.8721
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Telecom",
+      "nlp_type": "Transaction",
+      "best_hour": 10,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0927,
+      "hybrid_score_peak": 1.0405,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.395,
+          "time_score_norm": 1.018,
+          "hybrid_score_norm": 1.009
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2873,
+          "time_score_norm": 0.7404,
+          "hybrid_score_norm": 0.8605
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3935,
+          "time_score_norm": 1.0141,
+          "hybrid_score_norm": 1.007
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0825,
+          "hybrid_score_norm": 1.0404
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4194,
+          "time_score_norm": 1.0809,
+          "hybrid_score_norm": 1.0397
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0826,
+          "hybrid_score_norm": 1.0405
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.408,
+          "time_score_norm": 1.0515,
+          "hybrid_score_norm": 1.0254
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0927,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3744,
+          "time_score_norm": 0.965,
+          "hybrid_score_norm": 0.9823
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3642,
+          "time_score_norm": 0.9388,
+          "hybrid_score_norm": 0.9689
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3359,
+          "time_score_norm": 0.8658,
+          "hybrid_score_norm": 0.9305
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3937,
+          "time_score_norm": 1.0147,
+          "hybrid_score_norm": 1.0073
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2728,
+          "time_score_norm": 0.703,
+          "hybrid_score_norm": 0.8384
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.2721,
+          "time_score_norm": 0.7013,
+          "hybrid_score_norm": 0.8374
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2555,
+          "time_score_norm": 0.6584,
+          "hybrid_score_norm": 0.8114
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2303,
+          "time_score_norm": 0.5935,
+          "hybrid_score_norm": 0.7704
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3168,
+          "time_score_norm": 0.8164,
+          "hybrid_score_norm": 0.9036
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.314,
+          "time_score_norm": 0.8092,
+          "hybrid_score_norm": 0.8995
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Telecom",
+      "nlp_type": "Alerte",
+      "best_hour": 9,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.254,
+      "hybrid_score_peak": 1.1198,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.4642,
+          "time_score_norm": 1.1964,
+          "hybrid_score_norm": 1.0938
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4747,
+          "time_score_norm": 1.2235,
+          "hybrid_score_norm": 1.1061
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4865,
+          "time_score_norm": 1.254,
+          "hybrid_score_norm": 1.1198
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.4844,
+          "time_score_norm": 1.2484,
+          "hybrid_score_norm": 1.1173
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4266,
+          "time_score_norm": 1.0994,
+          "hybrid_score_norm": 1.0485
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.4789,
+          "time_score_norm": 1.2343,
+          "hybrid_score_norm": 1.111
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.4076,
+          "time_score_norm": 1.0504,
+          "hybrid_score_norm": 1.0249
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3693,
+          "time_score_norm": 0.9517,
+          "hybrid_score_norm": 0.9756
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.381,
+          "time_score_norm": 0.982,
+          "hybrid_score_norm": 0.991
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.4546,
+          "time_score_norm": 1.1715,
+          "hybrid_score_norm": 1.0824
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2991,
+          "time_score_norm": 0.771,
+          "hybrid_score_norm": 0.878
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3384,
+          "time_score_norm": 0.8721,
+          "hybrid_score_norm": 0.9338
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2766,
+          "time_score_norm": 0.7129,
+          "hybrid_score_norm": 0.8444
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3875,
+          "time_score_norm": 0.9988,
+          "hybrid_score_norm": 0.9994
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3698,
+          "time_score_norm": 0.953,
+          "hybrid_score_norm": 0.9762
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3327,
+          "time_score_norm": 0.8574,
+          "hybrid_score_norm": 0.926
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3686,
+          "time_score_norm": 0.9501,
+          "hybrid_score_norm": 0.9747
+        }
+      ]
+    },
+    {
+      "camp_type": "CLASSIC",
+      "operateur": "Telecom",
+      "nlp_type": "Livraison",
+      "best_hour": 19,
+      "window_start": 15,
+      "window_end": 20,
+      "window_label": "15h–20h",
+      "method": "fallback_posthoc",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0034,
+      "hybrid_score_peak": 1.0017,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3088,
+          "time_score_norm": 0.7957,
+          "hybrid_score_norm": 0.892
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.285,
+          "time_score_norm": 0.7345,
+          "hybrid_score_norm": 0.8571
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.2506,
+          "time_score_norm": 0.6459,
+          "hybrid_score_norm": 0.8037
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2895,
+          "time_score_norm": 0.7462,
+          "hybrid_score_norm": 0.8638
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.2039,
+          "time_score_norm": 0.5256,
+          "hybrid_score_norm": 0.725
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3146,
+          "time_score_norm": 0.8108,
+          "hybrid_score_norm": 0.9005
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3137,
+          "time_score_norm": 0.8084,
+          "hybrid_score_norm": 0.8991
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.228,
+          "time_score_norm": 0.5876,
+          "hybrid_score_norm": 0.7666
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3622,
+          "time_score_norm": 0.9336,
+          "hybrid_score_norm": 0.9662
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3034,
+          "time_score_norm": 0.782,
+          "hybrid_score_norm": 0.8843
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.3844,
+          "time_score_norm": 0.9907,
+          "hybrid_score_norm": 0.9953
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3331,
+          "time_score_norm": 0.8586,
+          "hybrid_score_norm": 0.9266
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.3893,
+          "time_score_norm": 1.0034,
+          "hybrid_score_norm": 1.0017
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3422,
+          "time_score_norm": 0.882,
+          "hybrid_score_norm": 0.9391
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3637,
+          "time_score_norm": 0.9373,
+          "hybrid_score_norm": 0.9681
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3214,
+          "time_score_norm": 0.8283,
+          "hybrid_score_norm": 0.9101
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2771,
+          "time_score_norm": 0.7143,
+          "hybrid_score_norm": 0.8452
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Orange",
+      "nlp_type": "Promotion",
+      "best_hour": 17,
+      "window_start": 17,
+      "window_end": 19,
+      "window_label": "17h–19h",
+      "method": "evening_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0928,
+      "hybrid_score_peak": 1.0453,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.282,
+          "time_score_norm": 0.7269,
+          "hybrid_score_norm": 0.8526
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.3089,
+          "time_score_norm": 0.7962,
+          "hybrid_score_norm": 0.8923
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.267,
+          "time_score_norm": 0.6881,
+          "hybrid_score_norm": 0.8295
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2418,
+          "time_score_norm": 0.6231,
+          "hybrid_score_norm": 0.7894
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.3597,
+          "time_score_norm": 0.9271,
+          "hybrid_score_norm": 0.9629
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3027,
+          "time_score_norm": 0.7802,
+          "hybrid_score_norm": 0.8833
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.2883,
+          "time_score_norm": 0.743,
+          "hybrid_score_norm": 0.862
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.384,
+          "time_score_norm": 0.9897,
+          "hybrid_score_norm": 0.9948
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.2832,
+          "time_score_norm": 0.7299,
+          "hybrid_score_norm": 0.8544
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3071,
+          "time_score_norm": 0.7915,
+          "hybrid_score_norm": 0.8897
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0928,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.4015,
+          "time_score_norm": 1.0349,
+          "hybrid_score_norm": 1.0173
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.4014,
+          "time_score_norm": 1.0345,
+          "hybrid_score_norm": 1.0171
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.4028,
+          "time_score_norm": 1.0381,
+          "hybrid_score_norm": 1.0189
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3984,
+          "time_score_norm": 1.0269,
+          "hybrid_score_norm": 1.0133
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.4088,
+          "time_score_norm": 1.0536,
+          "hybrid_score_norm": 1.0265
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Orange",
+      "nlp_type": "OTP",
+      "best_hour": 8,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.2965,
+      "hybrid_score_peak": 1.1268,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.4379,
+          "time_score_norm": 1.1286,
+          "hybrid_score_norm": 1.0624
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.401,
+          "time_score_norm": 1.0336,
+          "hybrid_score_norm": 1.0166
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4926,
+          "time_score_norm": 1.2697,
+          "hybrid_score_norm": 1.1268
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4532,
+          "time_score_norm": 1.168,
+          "hybrid_score_norm": 1.0807
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.482,
+          "time_score_norm": 1.2423,
+          "hybrid_score_norm": 1.1146
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4841,
+          "time_score_norm": 1.2477,
+          "hybrid_score_norm": 1.117
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.5031,
+          "time_score_norm": 1.2965,
+          "hybrid_score_norm": 1.1387
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3949,
+          "time_score_norm": 1.0177,
+          "hybrid_score_norm": 1.0088
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.4441,
+          "time_score_norm": 1.1445,
+          "hybrid_score_norm": 1.0698
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.4485,
+          "time_score_norm": 1.156,
+          "hybrid_score_norm": 1.0752
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3976,
+          "time_score_norm": 1.0248,
+          "hybrid_score_norm": 1.0123
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2672,
+          "time_score_norm": 0.6886,
+          "hybrid_score_norm": 0.8298
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.333,
+          "time_score_norm": 0.8584,
+          "hybrid_score_norm": 0.9265
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2311,
+          "time_score_norm": 0.5955,
+          "hybrid_score_norm": 0.7717
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2594,
+          "time_score_norm": 0.6685,
+          "hybrid_score_norm": 0.8176
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3507,
+          "time_score_norm": 0.9039,
+          "hybrid_score_norm": 0.9507
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.2951,
+          "time_score_norm": 0.7606,
+          "hybrid_score_norm": 0.8721
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Orange",
+      "nlp_type": "Transaction",
+      "best_hour": 10,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0927,
+      "hybrid_score_peak": 1.0405,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.395,
+          "time_score_norm": 1.018,
+          "hybrid_score_norm": 1.009
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2873,
+          "time_score_norm": 0.7404,
+          "hybrid_score_norm": 0.8605
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3935,
+          "time_score_norm": 1.0141,
+          "hybrid_score_norm": 1.007
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0825,
+          "hybrid_score_norm": 1.0404
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4194,
+          "time_score_norm": 1.0809,
+          "hybrid_score_norm": 1.0397
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0826,
+          "hybrid_score_norm": 1.0405
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.408,
+          "time_score_norm": 1.0515,
+          "hybrid_score_norm": 1.0254
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0927,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3744,
+          "time_score_norm": 0.965,
+          "hybrid_score_norm": 0.9823
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3642,
+          "time_score_norm": 0.9388,
+          "hybrid_score_norm": 0.9689
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3359,
+          "time_score_norm": 0.8658,
+          "hybrid_score_norm": 0.9305
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3937,
+          "time_score_norm": 1.0147,
+          "hybrid_score_norm": 1.0073
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2728,
+          "time_score_norm": 0.703,
+          "hybrid_score_norm": 0.8384
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.2721,
+          "time_score_norm": 0.7013,
+          "hybrid_score_norm": 0.8374
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2555,
+          "time_score_norm": 0.6584,
+          "hybrid_score_norm": 0.8114
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2303,
+          "time_score_norm": 0.5935,
+          "hybrid_score_norm": 0.7704
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3168,
+          "time_score_norm": 0.8164,
+          "hybrid_score_norm": 0.9036
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.314,
+          "time_score_norm": 0.8092,
+          "hybrid_score_norm": 0.8995
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Orange",
+      "nlp_type": "Alerte",
+      "best_hour": 9,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.254,
+      "hybrid_score_peak": 1.1198,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.4642,
+          "time_score_norm": 1.1964,
+          "hybrid_score_norm": 1.0938
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4747,
+          "time_score_norm": 1.2235,
+          "hybrid_score_norm": 1.1061
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4865,
+          "time_score_norm": 1.254,
+          "hybrid_score_norm": 1.1198
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.4844,
+          "time_score_norm": 1.2484,
+          "hybrid_score_norm": 1.1173
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4266,
+          "time_score_norm": 1.0994,
+          "hybrid_score_norm": 1.0485
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.4789,
+          "time_score_norm": 1.2343,
+          "hybrid_score_norm": 1.111
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.4076,
+          "time_score_norm": 1.0504,
+          "hybrid_score_norm": 1.0249
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3693,
+          "time_score_norm": 0.9517,
+          "hybrid_score_norm": 0.9756
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.381,
+          "time_score_norm": 0.982,
+          "hybrid_score_norm": 0.991
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.4546,
+          "time_score_norm": 1.1715,
+          "hybrid_score_norm": 1.0824
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2991,
+          "time_score_norm": 0.771,
+          "hybrid_score_norm": 0.878
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3384,
+          "time_score_norm": 0.8721,
+          "hybrid_score_norm": 0.9338
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2766,
+          "time_score_norm": 0.7129,
+          "hybrid_score_norm": 0.8444
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3875,
+          "time_score_norm": 0.9988,
+          "hybrid_score_norm": 0.9994
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3698,
+          "time_score_norm": 0.953,
+          "hybrid_score_norm": 0.9762
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3327,
+          "time_score_norm": 0.8574,
+          "hybrid_score_norm": 0.926
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3686,
+          "time_score_norm": 0.9501,
+          "hybrid_score_norm": 0.9747
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Orange",
+      "nlp_type": "Livraison",
+      "best_hour": 19,
+      "window_start": 15,
+      "window_end": 20,
+      "window_label": "15h–20h",
+      "method": "fallback_posthoc",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0034,
+      "hybrid_score_peak": 1.0017,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3088,
+          "time_score_norm": 0.7957,
+          "hybrid_score_norm": 0.892
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.285,
+          "time_score_norm": 0.7345,
+          "hybrid_score_norm": 0.8571
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.2506,
+          "time_score_norm": 0.6459,
+          "hybrid_score_norm": 0.8037
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2895,
+          "time_score_norm": 0.7462,
+          "hybrid_score_norm": 0.8638
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.2039,
+          "time_score_norm": 0.5256,
+          "hybrid_score_norm": 0.725
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3146,
+          "time_score_norm": 0.8108,
+          "hybrid_score_norm": 0.9005
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3137,
+          "time_score_norm": 0.8084,
+          "hybrid_score_norm": 0.8991
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.228,
+          "time_score_norm": 0.5876,
+          "hybrid_score_norm": 0.7666
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3622,
+          "time_score_norm": 0.9336,
+          "hybrid_score_norm": 0.9662
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3034,
+          "time_score_norm": 0.782,
+          "hybrid_score_norm": 0.8843
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.3844,
+          "time_score_norm": 0.9907,
+          "hybrid_score_norm": 0.9953
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3331,
+          "time_score_norm": 0.8586,
+          "hybrid_score_norm": 0.9266
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.3893,
+          "time_score_norm": 1.0034,
+          "hybrid_score_norm": 1.0017
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3422,
+          "time_score_norm": 0.882,
+          "hybrid_score_norm": 0.9391
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3637,
+          "time_score_norm": 0.9373,
+          "hybrid_score_norm": 0.9681
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3214,
+          "time_score_norm": 0.8283,
+          "hybrid_score_norm": 0.9101
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2771,
+          "time_score_norm": 0.7143,
+          "hybrid_score_norm": 0.8452
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Ooredoo",
+      "nlp_type": "Promotion",
+      "best_hour": 17,
+      "window_start": 17,
+      "window_end": 19,
+      "window_label": "17h–19h",
+      "method": "evening_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0928,
+      "hybrid_score_peak": 1.0453,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.282,
+          "time_score_norm": 0.7269,
+          "hybrid_score_norm": 0.8526
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.3089,
+          "time_score_norm": 0.7962,
+          "hybrid_score_norm": 0.8923
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.267,
+          "time_score_norm": 0.6881,
+          "hybrid_score_norm": 0.8295
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2418,
+          "time_score_norm": 0.6231,
+          "hybrid_score_norm": 0.7894
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.3597,
+          "time_score_norm": 0.9271,
+          "hybrid_score_norm": 0.9629
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3027,
+          "time_score_norm": 0.7802,
+          "hybrid_score_norm": 0.8833
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.2883,
+          "time_score_norm": 0.743,
+          "hybrid_score_norm": 0.862
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.384,
+          "time_score_norm": 0.9897,
+          "hybrid_score_norm": 0.9948
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.2832,
+          "time_score_norm": 0.7299,
+          "hybrid_score_norm": 0.8544
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3071,
+          "time_score_norm": 0.7915,
+          "hybrid_score_norm": 0.8897
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0928,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.4015,
+          "time_score_norm": 1.0349,
+          "hybrid_score_norm": 1.0173
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.4014,
+          "time_score_norm": 1.0345,
+          "hybrid_score_norm": 1.0171
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.4028,
+          "time_score_norm": 1.0381,
+          "hybrid_score_norm": 1.0189
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3984,
+          "time_score_norm": 1.0269,
+          "hybrid_score_norm": 1.0133
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.4088,
+          "time_score_norm": 1.0536,
+          "hybrid_score_norm": 1.0265
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Ooredoo",
+      "nlp_type": "OTP",
+      "best_hour": 8,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.2965,
+      "hybrid_score_peak": 1.1268,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.4379,
+          "time_score_norm": 1.1286,
+          "hybrid_score_norm": 1.0624
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.401,
+          "time_score_norm": 1.0336,
+          "hybrid_score_norm": 1.0166
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4926,
+          "time_score_norm": 1.2697,
+          "hybrid_score_norm": 1.1268
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4532,
+          "time_score_norm": 1.168,
+          "hybrid_score_norm": 1.0807
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.482,
+          "time_score_norm": 1.2423,
+          "hybrid_score_norm": 1.1146
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4841,
+          "time_score_norm": 1.2477,
+          "hybrid_score_norm": 1.117
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.5031,
+          "time_score_norm": 1.2965,
+          "hybrid_score_norm": 1.1387
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3949,
+          "time_score_norm": 1.0177,
+          "hybrid_score_norm": 1.0088
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.4441,
+          "time_score_norm": 1.1445,
+          "hybrid_score_norm": 1.0698
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.4485,
+          "time_score_norm": 1.156,
+          "hybrid_score_norm": 1.0752
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3976,
+          "time_score_norm": 1.0248,
+          "hybrid_score_norm": 1.0123
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2672,
+          "time_score_norm": 0.6886,
+          "hybrid_score_norm": 0.8298
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.333,
+          "time_score_norm": 0.8584,
+          "hybrid_score_norm": 0.9265
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2311,
+          "time_score_norm": 0.5955,
+          "hybrid_score_norm": 0.7717
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2594,
+          "time_score_norm": 0.6685,
+          "hybrid_score_norm": 0.8176
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3507,
+          "time_score_norm": 0.9039,
+          "hybrid_score_norm": 0.9507
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.2951,
+          "time_score_norm": 0.7606,
+          "hybrid_score_norm": 0.8721
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Ooredoo",
+      "nlp_type": "Transaction",
+      "best_hour": 10,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0927,
+      "hybrid_score_peak": 1.0405,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.395,
+          "time_score_norm": 1.018,
+          "hybrid_score_norm": 1.009
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2873,
+          "time_score_norm": 0.7404,
+          "hybrid_score_norm": 0.8605
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3935,
+          "time_score_norm": 1.0141,
+          "hybrid_score_norm": 1.007
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0825,
+          "hybrid_score_norm": 1.0404
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4194,
+          "time_score_norm": 1.0809,
+          "hybrid_score_norm": 1.0397
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0826,
+          "hybrid_score_norm": 1.0405
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.408,
+          "time_score_norm": 1.0515,
+          "hybrid_score_norm": 1.0254
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0927,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3744,
+          "time_score_norm": 0.965,
+          "hybrid_score_norm": 0.9823
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3642,
+          "time_score_norm": 0.9388,
+          "hybrid_score_norm": 0.9689
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3359,
+          "time_score_norm": 0.8658,
+          "hybrid_score_norm": 0.9305
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3937,
+          "time_score_norm": 1.0147,
+          "hybrid_score_norm": 1.0073
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2728,
+          "time_score_norm": 0.703,
+          "hybrid_score_norm": 0.8384
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.2721,
+          "time_score_norm": 0.7013,
+          "hybrid_score_norm": 0.8374
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2555,
+          "time_score_norm": 0.6584,
+          "hybrid_score_norm": 0.8114
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2303,
+          "time_score_norm": 0.5935,
+          "hybrid_score_norm": 0.7704
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3168,
+          "time_score_norm": 0.8164,
+          "hybrid_score_norm": 0.9036
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.314,
+          "time_score_norm": 0.8092,
+          "hybrid_score_norm": 0.8995
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Ooredoo",
+      "nlp_type": "Alerte",
+      "best_hour": 9,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.254,
+      "hybrid_score_peak": 1.1198,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.4642,
+          "time_score_norm": 1.1964,
+          "hybrid_score_norm": 1.0938
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4747,
+          "time_score_norm": 1.2235,
+          "hybrid_score_norm": 1.1061
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4865,
+          "time_score_norm": 1.254,
+          "hybrid_score_norm": 1.1198
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.4844,
+          "time_score_norm": 1.2484,
+          "hybrid_score_norm": 1.1173
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4266,
+          "time_score_norm": 1.0994,
+          "hybrid_score_norm": 1.0485
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.4789,
+          "time_score_norm": 1.2343,
+          "hybrid_score_norm": 1.111
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.4076,
+          "time_score_norm": 1.0504,
+          "hybrid_score_norm": 1.0249
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3693,
+          "time_score_norm": 0.9517,
+          "hybrid_score_norm": 0.9756
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.381,
+          "time_score_norm": 0.982,
+          "hybrid_score_norm": 0.991
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.4546,
+          "time_score_norm": 1.1715,
+          "hybrid_score_norm": 1.0824
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2991,
+          "time_score_norm": 0.771,
+          "hybrid_score_norm": 0.878
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3384,
+          "time_score_norm": 0.8721,
+          "hybrid_score_norm": 0.9338
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2766,
+          "time_score_norm": 0.7129,
+          "hybrid_score_norm": 0.8444
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3875,
+          "time_score_norm": 0.9988,
+          "hybrid_score_norm": 0.9994
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3698,
+          "time_score_norm": 0.953,
+          "hybrid_score_norm": 0.9762
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3327,
+          "time_score_norm": 0.8574,
+          "hybrid_score_norm": 0.926
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3686,
+          "time_score_norm": 0.9501,
+          "hybrid_score_norm": 0.9747
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Ooredoo",
+      "nlp_type": "Livraison",
+      "best_hour": 19,
+      "window_start": 15,
+      "window_end": 20,
+      "window_label": "15h–20h",
+      "method": "fallback_posthoc",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0034,
+      "hybrid_score_peak": 1.0017,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3088,
+          "time_score_norm": 0.7957,
+          "hybrid_score_norm": 0.892
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.285,
+          "time_score_norm": 0.7345,
+          "hybrid_score_norm": 0.8571
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.2506,
+          "time_score_norm": 0.6459,
+          "hybrid_score_norm": 0.8037
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2895,
+          "time_score_norm": 0.7462,
+          "hybrid_score_norm": 0.8638
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.2039,
+          "time_score_norm": 0.5256,
+          "hybrid_score_norm": 0.725
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3146,
+          "time_score_norm": 0.8108,
+          "hybrid_score_norm": 0.9005
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3137,
+          "time_score_norm": 0.8084,
+          "hybrid_score_norm": 0.8991
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.228,
+          "time_score_norm": 0.5876,
+          "hybrid_score_norm": 0.7666
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3622,
+          "time_score_norm": 0.9336,
+          "hybrid_score_norm": 0.9662
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3034,
+          "time_score_norm": 0.782,
+          "hybrid_score_norm": 0.8843
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.3844,
+          "time_score_norm": 0.9907,
+          "hybrid_score_norm": 0.9953
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3331,
+          "time_score_norm": 0.8586,
+          "hybrid_score_norm": 0.9266
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.3893,
+          "time_score_norm": 1.0034,
+          "hybrid_score_norm": 1.0017
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3422,
+          "time_score_norm": 0.882,
+          "hybrid_score_norm": 0.9391
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3637,
+          "time_score_norm": 0.9373,
+          "hybrid_score_norm": 0.9681
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3214,
+          "time_score_norm": 0.8283,
+          "hybrid_score_norm": 0.9101
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2771,
+          "time_score_norm": 0.7143,
+          "hybrid_score_norm": 0.8452
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Telecom",
+      "nlp_type": "Promotion",
+      "best_hour": 17,
+      "window_start": 17,
+      "window_end": 19,
+      "window_label": "17h–19h",
+      "method": "evening_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0928,
+      "hybrid_score_peak": 1.0453,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.282,
+          "time_score_norm": 0.7269,
+          "hybrid_score_norm": 0.8526
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.3089,
+          "time_score_norm": 0.7962,
+          "hybrid_score_norm": 0.8923
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.267,
+          "time_score_norm": 0.6881,
+          "hybrid_score_norm": 0.8295
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2418,
+          "time_score_norm": 0.6231,
+          "hybrid_score_norm": 0.7894
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.3597,
+          "time_score_norm": 0.9271,
+          "hybrid_score_norm": 0.9629
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3027,
+          "time_score_norm": 0.7802,
+          "hybrid_score_norm": 0.8833
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.2883,
+          "time_score_norm": 0.743,
+          "hybrid_score_norm": 0.862
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.384,
+          "time_score_norm": 0.9897,
+          "hybrid_score_norm": 0.9948
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.2832,
+          "time_score_norm": 0.7299,
+          "hybrid_score_norm": 0.8544
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3071,
+          "time_score_norm": 0.7915,
+          "hybrid_score_norm": 0.8897
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0928,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.4015,
+          "time_score_norm": 1.0349,
+          "hybrid_score_norm": 1.0173
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.4014,
+          "time_score_norm": 1.0345,
+          "hybrid_score_norm": 1.0171
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.4028,
+          "time_score_norm": 1.0381,
+          "hybrid_score_norm": 1.0189
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3984,
+          "time_score_norm": 1.0269,
+          "hybrid_score_norm": 1.0133
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.4088,
+          "time_score_norm": 1.0536,
+          "hybrid_score_norm": 1.0265
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Telecom",
+      "nlp_type": "OTP",
+      "best_hour": 8,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.2965,
+      "hybrid_score_peak": 1.1268,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.383,
+          "time_score_norm": 0.9872,
+          "hybrid_score_norm": 0.9936
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.4379,
+          "time_score_norm": 1.1286,
+          "hybrid_score_norm": 1.0624
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.401,
+          "time_score_norm": 1.0336,
+          "hybrid_score_norm": 1.0166
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4926,
+          "time_score_norm": 1.2697,
+          "hybrid_score_norm": 1.1268
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4532,
+          "time_score_norm": 1.168,
+          "hybrid_score_norm": 1.0807
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.482,
+          "time_score_norm": 1.2423,
+          "hybrid_score_norm": 1.1146
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4841,
+          "time_score_norm": 1.2477,
+          "hybrid_score_norm": 1.117
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.5031,
+          "time_score_norm": 1.2965,
+          "hybrid_score_norm": 1.1387
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3949,
+          "time_score_norm": 1.0177,
+          "hybrid_score_norm": 1.0088
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.4441,
+          "time_score_norm": 1.1445,
+          "hybrid_score_norm": 1.0698
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.4485,
+          "time_score_norm": 1.156,
+          "hybrid_score_norm": 1.0752
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3976,
+          "time_score_norm": 1.0248,
+          "hybrid_score_norm": 1.0123
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2672,
+          "time_score_norm": 0.6886,
+          "hybrid_score_norm": 0.8298
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.333,
+          "time_score_norm": 0.8584,
+          "hybrid_score_norm": 0.9265
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2311,
+          "time_score_norm": 0.5955,
+          "hybrid_score_norm": 0.7717
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2594,
+          "time_score_norm": 0.6685,
+          "hybrid_score_norm": 0.8176
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3507,
+          "time_score_norm": 0.9039,
+          "hybrid_score_norm": 0.9507
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.2951,
+          "time_score_norm": 0.7606,
+          "hybrid_score_norm": 0.8721
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Telecom",
+      "nlp_type": "Transaction",
+      "best_hour": 10,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0927,
+      "hybrid_score_peak": 1.0405,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.395,
+          "time_score_norm": 1.018,
+          "hybrid_score_norm": 1.009
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.4133,
+          "time_score_norm": 1.0653,
+          "hybrid_score_norm": 1.0321
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3326,
+          "time_score_norm": 0.8571,
+          "hybrid_score_norm": 0.9258
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2873,
+          "time_score_norm": 0.7404,
+          "hybrid_score_norm": 0.8605
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3935,
+          "time_score_norm": 1.0141,
+          "hybrid_score_norm": 1.007
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0825,
+          "hybrid_score_norm": 1.0404
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4194,
+          "time_score_norm": 1.0809,
+          "hybrid_score_norm": 1.0397
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.42,
+          "time_score_norm": 1.0826,
+          "hybrid_score_norm": 1.0405
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.408,
+          "time_score_norm": 1.0515,
+          "hybrid_score_norm": 1.0254
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.424,
+          "time_score_norm": 1.0927,
+          "hybrid_score_norm": 1.0453
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3744,
+          "time_score_norm": 0.965,
+          "hybrid_score_norm": 0.9823
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3642,
+          "time_score_norm": 0.9388,
+          "hybrid_score_norm": 0.9689
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3359,
+          "time_score_norm": 0.8658,
+          "hybrid_score_norm": 0.9305
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3937,
+          "time_score_norm": 1.0147,
+          "hybrid_score_norm": 1.0073
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2728,
+          "time_score_norm": 0.703,
+          "hybrid_score_norm": 0.8384
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.2721,
+          "time_score_norm": 0.7013,
+          "hybrid_score_norm": 0.8374
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2555,
+          "time_score_norm": 0.6584,
+          "hybrid_score_norm": 0.8114
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.2303,
+          "time_score_norm": 0.5935,
+          "hybrid_score_norm": 0.7704
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3168,
+          "time_score_norm": 0.8164,
+          "hybrid_score_norm": 0.9036
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.314,
+          "time_score_norm": 0.8092,
+          "hybrid_score_norm": 0.8995
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Telecom",
+      "nlp_type": "Alerte",
+      "best_hour": 9,
+      "window_start": 7,
+      "window_end": 11,
+      "window_label": "07h–11h",
+      "method": "morning_priority",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.254,
+      "hybrid_score_peak": 1.1198,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3718,
+          "time_score_norm": 0.9582,
+          "hybrid_score_norm": 0.9789
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.3755,
+          "time_score_norm": 0.9677,
+          "hybrid_score_norm": 0.9837
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.4642,
+          "time_score_norm": 1.1964,
+          "hybrid_score_norm": 1.0938
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.4747,
+          "time_score_norm": 1.2235,
+          "hybrid_score_norm": 1.1061
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.4865,
+          "time_score_norm": 1.254,
+          "hybrid_score_norm": 1.1198
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.4844,
+          "time_score_norm": 1.2484,
+          "hybrid_score_norm": 1.1173
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.4266,
+          "time_score_norm": 1.0994,
+          "hybrid_score_norm": 1.0485
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.4789,
+          "time_score_norm": 1.2343,
+          "hybrid_score_norm": 1.111
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.4076,
+          "time_score_norm": 1.0504,
+          "hybrid_score_norm": 1.0249
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.3693,
+          "time_score_norm": 0.9517,
+          "hybrid_score_norm": 0.9756
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.381,
+          "time_score_norm": 0.982,
+          "hybrid_score_norm": 0.991
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.4546,
+          "time_score_norm": 1.1715,
+          "hybrid_score_norm": 1.0824
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.2991,
+          "time_score_norm": 0.771,
+          "hybrid_score_norm": 0.878
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3384,
+          "time_score_norm": 0.8721,
+          "hybrid_score_norm": 0.9338
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.2766,
+          "time_score_norm": 0.7129,
+          "hybrid_score_norm": 0.8444
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3875,
+          "time_score_norm": 0.9988,
+          "hybrid_score_norm": 0.9994
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3698,
+          "time_score_norm": 0.953,
+          "hybrid_score_norm": 0.9762
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3327,
+          "time_score_norm": 0.8574,
+          "hybrid_score_norm": 0.926
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.3686,
+          "time_score_norm": 0.9501,
+          "hybrid_score_norm": 0.9747
+        }
+      ]
+    },
+    {
+      "camp_type": "TRANSACTIONAL",
+      "operateur": "Telecom",
+      "nlp_type": "Livraison",
+      "best_hour": 19,
+      "window_start": 15,
+      "window_end": 20,
+      "window_label": "15h–20h",
+      "method": "fallback_posthoc",
+      "model_score_raw": 1.0,
+      "norm_peak": 1.0034,
+      "hybrid_score_peak": 1.0017,
+      "alpha": 0.5,
+      "threshold_pct": 0.95,
+      "allowed_hours": "7h–23h",
+      "hourly_curve": [
+        {
+          "hour": 0,
+          "time_score_raw": 0.3424,
+          "time_score_norm": 0.8824,
+          "hybrid_score_norm": 0.9393
+        },
+        {
+          "hour": 1,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 2,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 3,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 4,
+          "time_score_raw": 0.388,
+          "time_score_norm": 1.0,
+          "hybrid_score_norm": 1.0
+        },
+        {
+          "hour": 5,
+          "time_score_raw": 0.3638,
+          "time_score_norm": 0.9375,
+          "hybrid_score_norm": 0.9682
+        },
+        {
+          "hour": 6,
+          "time_score_raw": 0.2645,
+          "time_score_norm": 0.6818,
+          "hybrid_score_norm": 0.8257
+        },
+        {
+          "hour": 7,
+          "time_score_raw": 0.3088,
+          "time_score_norm": 0.7957,
+          "hybrid_score_norm": 0.892
+        },
+        {
+          "hour": 8,
+          "time_score_raw": 0.285,
+          "time_score_norm": 0.7345,
+          "hybrid_score_norm": 0.8571
+        },
+        {
+          "hour": 9,
+          "time_score_raw": 0.2506,
+          "time_score_norm": 0.6459,
+          "hybrid_score_norm": 0.8037
+        },
+        {
+          "hour": 10,
+          "time_score_raw": 0.2895,
+          "time_score_norm": 0.7462,
+          "hybrid_score_norm": 0.8638
+        },
+        {
+          "hour": 11,
+          "time_score_raw": 0.2039,
+          "time_score_norm": 0.5256,
+          "hybrid_score_norm": 0.725
+        },
+        {
+          "hour": 12,
+          "time_score_raw": 0.3146,
+          "time_score_norm": 0.8108,
+          "hybrid_score_norm": 0.9005
+        },
+        {
+          "hour": 13,
+          "time_score_raw": 0.3137,
+          "time_score_norm": 0.8084,
+          "hybrid_score_norm": 0.8991
+        },
+        {
+          "hour": 14,
+          "time_score_raw": 0.228,
+          "time_score_norm": 0.5876,
+          "hybrid_score_norm": 0.7666
+        },
+        {
+          "hour": 15,
+          "time_score_raw": 0.3622,
+          "time_score_norm": 0.9336,
+          "hybrid_score_norm": 0.9662
+        },
+        {
+          "hour": 16,
+          "time_score_raw": 0.3034,
+          "time_score_norm": 0.782,
+          "hybrid_score_norm": 0.8843
+        },
+        {
+          "hour": 17,
+          "time_score_raw": 0.3844,
+          "time_score_norm": 0.9907,
+          "hybrid_score_norm": 0.9953
+        },
+        {
+          "hour": 18,
+          "time_score_raw": 0.3331,
+          "time_score_norm": 0.8586,
+          "hybrid_score_norm": 0.9266
+        },
+        {
+          "hour": 19,
+          "time_score_raw": 0.3893,
+          "time_score_norm": 1.0034,
+          "hybrid_score_norm": 1.0017
+        },
+        {
+          "hour": 20,
+          "time_score_raw": 0.3422,
+          "time_score_norm": 0.882,
+          "hybrid_score_norm": 0.9391
+        },
+        {
+          "hour": 21,
+          "time_score_raw": 0.3637,
+          "time_score_norm": 0.9373,
+          "hybrid_score_norm": 0.9681
+        },
+        {
+          "hour": 22,
+          "time_score_raw": 0.3214,
+          "time_score_norm": 0.8283,
+          "hybrid_score_norm": 0.9101
+        },
+        {
+          "hour": 23,
+          "time_score_raw": 0.2771,
+          "time_score_norm": 0.7143,
+          "hybrid_score_norm": 0.8452
+        }
+      ]
+    }
+  ]
+}

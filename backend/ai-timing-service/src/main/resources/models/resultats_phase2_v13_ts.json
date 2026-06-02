@@ -1,0 +1,187 @@
+{
+  "modele": "Ensemble Phase 2 — v13 + Thompson Sampling",
+  "version": "v13_ts",
+  "thompson_sampling": {
+    "enabled": true,
+    "exploration_rate": 0.1,
+    "hybrid_weight": 0.5,
+    "alpha_prior": 1.0,
+    "beta_prior": 1.0,
+    "n_contexts": 462,
+    "n_updates": 10001
+  },
+  "nouveautes_v13_ts": [
+    "Plages horaires corrigées (matin: 7h-11h)",
+    "Biais directionnel pour types sensibles",
+    "SMOTE ratio 0.6",
+    "Calibration isotonic des probabilités",
+    "Feature selection : 50 features",
+    "Régularisation L1 renforcée (0.30)",
+    "Seuils adaptatifs par type NLP",
+    "Thompson Sampling avec ε=0.1",
+    "Hybridation ML/TS avec w=0.5"
+  ],
+  "models_used": [
+    "xgb"
+  ],
+  "calibration": true,
+  "feature_selection": {
+    "enabled": true,
+    "n_features_selected": 50
+  },
+  "individual_aucs": {
+    "xgb": 0.8143
+  },
+  "ensemble_method": "single",
+  "metriques": {
+    "auc_roc": 0.8143,
+    "pr_auc": 0.7707,
+    "auc_cv_mean": 0.8131,
+    "auc_cv_std": 0.0038,
+    "seuils": [
+      {
+        "label": "Seuil 0.500",
+        "accuracy": 0.7446,
+        "precision": 0.8806,
+        "recall": 0.3954,
+        "f1": 0.5457
+      },
+      {
+        "label": "F1 opt (0.343)",
+        "accuracy": 0.6566,
+        "precision": 0.5351,
+        "recall": 0.8768,
+        "f1": 0.6646
+      },
+      {
+        "label": "Prec>=0.60 (0.381)",
+        "accuracy": 0.7056,
+        "precision": 0.6004,
+        "recall": 0.7211,
+        "f1": 0.6553
+      },
+      {
+        "label": "Prec>=0.70 (0.421)",
+        "accuracy": 0.7338,
+        "precision": 0.7003,
+        "recall": 0.5487,
+        "f1": 0.6153
+      }
+    ],
+    "seuils_adaptatifs_par_type": {
+      "Transaction": 0.411,
+      "OTP": 0.415,
+      "Rappel": 0.405,
+      "Location_Vente": 0.401,
+      "Livraison": 0.385,
+      "Promotion": 0.395,
+      "Information": 0.408,
+      "Felicitation": 0.389,
+      "Alerte": 0.427,
+      "Recrutement": 0.427,
+      "Recharge_Telecom": 0.422
+    }
+  },
+  "feature_importance_top20": [
+    {
+      "feature": "smsc_name_target_loo",
+      "importance": 0.49041590094566345,
+      "source": "TargetEnc"
+    },
+    {
+      "feature": "smsc_name_enc",
+      "importance": 0.1791413426399231,
+      "source": "Phase1"
+    },
+    {
+      "feature": "is_nuit",
+      "importance": 0.009951133280992508,
+      "source": "Phase1"
+    },
+    {
+      "feature": "is_peak_morning",
+      "importance": 0.009888178668916225,
+      "source": "Phase1"
+    },
+    {
+      "feature": "msisdn_tier",
+      "importance": 0.009398740716278553,
+      "source": "MSISDN"
+    },
+    {
+      "feature": "sms_last_24h",
+      "importance": 0.009393461048603058,
+      "source": "Phase1"
+    },
+    {
+      "feature": "nlp_text_mult",
+      "importance": 0.009241677820682526,
+      "source": "NLP_v8"
+    },
+    {
+      "feature": "is_soir",
+      "importance": 0.008889785967767239,
+      "source": "Phase1"
+    },
+    {
+      "feature": "type_OTP",
+      "importance": 0.008855903521180153,
+      "source": "OHE_type"
+    },
+    {
+      "feature": "urgency_score",
+      "importance": 0.00871794018894434,
+      "source": "NLP_base"
+    },
+    {
+      "feature": "urgent_x_hour",
+      "importance": 0.008639597333967686,
+      "source": "Interaction"
+    },
+    {
+      "feature": "sms_fatigue_penalty",
+      "importance": 0.008301702328026295,
+      "source": "Phase1"
+    },
+    {
+      "feature": "marketing_x_evening",
+      "importance": 0.008262423798441887,
+      "source": "Interaction"
+    },
+    {
+      "feature": "is_promo",
+      "importance": 0.007829859852790833,
+      "source": "NLP_base"
+    },
+    {
+      "feature": "msisdn_rate_squared",
+      "importance": 0.007454416714608669,
+      "source": "MSISDN"
+    },
+    {
+      "feature": "type_Recrutement",
+      "importance": 0.007177662570029497,
+      "source": "OHE_type"
+    },
+    {
+      "feature": "is_mid_week",
+      "importance": 0.007160956040024757,
+      "source": "Phase1"
+    },
+    {
+      "feature": "is_weekend",
+      "importance": 0.007122874725610018,
+      "source": "Phase1"
+    },
+    {
+      "feature": "type_Location_Vente",
+      "importance": 0.006855754181742668,
+      "source": "OHE_type"
+    },
+    {
+      "feature": "is_peak",
+      "importance": 0.0067786904983222485,
+      "source": "Phase1"
+    }
+  ]
+}
