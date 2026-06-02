@@ -1,0 +1,49 @@
+<div class="select-organization-container">
+
+  <div class="select-organization-card">
+
+    <!-- Header : Logo + Titre -->
+    <div class="header-section">
+      <div class="logo-block">
+        <img src="assets/images/easybulk-logo.png"
+             alt="EasyBulk Logo"
+             class="logo-img">
+      </div>
+      <h2 class="card-title">Sélectionner une organisation</h2>
+    </div>
+
+    <form [formGroup]="selectForm" (ngSubmit)="onSubmit()">
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Sélectionner une Organisation</mat-label>
+        <mat-select formControlName="organizationId">
+          <mat-option 
+            *ngFor="let org of organizations" 
+            [value]="org.id">
+            {{ org.name }}
+          </mat-option>
+        </mat-select>
+        <mat-icon matPrefix>business</mat-icon>
+      </mat-form-field>
+
+      <!-- Erreur globale -->
+      <div class="global-error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Bouton -->
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        class="btn-validate"
+        [disabled]="selectForm.invalid || loading">
+        
+        <mat-spinner diameter="22" *ngIf="loading"></mat-spinner>
+        <span *ngIf="!loading">Valider</span>
+      </button>
+
+    </form>
+
+  </div>
+</div>

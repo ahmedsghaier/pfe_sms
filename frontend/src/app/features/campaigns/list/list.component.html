@@ -1,0 +1,327 @@
+<div class="campaign-list-container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">Gestion des Campagnes</h1>
+      <p class="page-subtitle">
+        {{ campaigns().length }} campagne(s) affichée(s)
+      </p>
+    </div>
+    <button class="btn-primary" routerLink="/campaigns/create">
+      <span>＋</span> Nouvelle Campagne
+    </button>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-icon blue">📣</div>
+      <div class="stat-content">
+        <div class="stat-label">Total</div>
+        <div class="stat-value">{{ campaigns().length }}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">▶</div>
+      <div class="stat-content">
+        <div class="stat-label">En cours</div>
+        <div class="stat-value">{{ countByStatus('RUNNING') }}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon amber">⏳</div>
+      <div class="stat-content">
+        <div class="stat-label">Planifiées</div>
+        <div class="stat-value">{{ countByStatus('SCHEDULED') }}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple">📋</div>
+      <div class="stat-content">
+        <div class="stat-label">En attente</div>
+        <div class="stat-value">{{ countByStatus('PENDING_VALIDATION') }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Rechercher une campagne…"
+        [(ngModel)]="filters.libelle"
+        (input)="applyFilters()"
+      />
+    </div>
+    <div class="toolbar-divider"></div>
+
+    <div class="filter-pills-group">
+      <!-- Status filter pill -->
+      <div class="filter-dropdown-wrapper">
+        <button
+          class="filter-pill"
+          [class.active]="filters.status !== ''"
+          (click)="toggleStatusDropdown()"
+        >
+          Statut
+          <span class="pill-badge" *ngIf="filters.status !== ''">1</span>
+          <span>▾</span>
+        </button>
+        <div class="dropdown-menu" *ngIf="showStatusDropdown">
+          <div
+            class="dropdown-item"
+            [class.selected]="filters.status === ''"
+            (click)="setStatusFilter('')"
+          >Tous</div>
+          <div
+            class="dropdown-item"
+            *ngFor="let status of statusList"
+            [class.selected]="filters.status === status"
+            (click)="setStatusFilter(status)"
+          >
+            <span class="dropdown-dot" [class]="'dot-' + status.toLowerCase()"></span>
+            {{ getStatusLabel(status) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Type filter pill -->
+      <div class="filter-dropdown-wrapper">
+        <button
+          class="filter-pill"
+          [class.active]="filters.type !== ''"
+          (click)="toggleTypeDropdown()"
+        >
+          Type
+          <span class="pill-badge" *ngIf="filters.type !== ''">1</span>
+          <span>▾</span>
+        </button>
+        <div class="dropdown-menu" *ngIf="showTypeDropdown">
+          <div
+            class="dropdown-item"
+            [class.selected]="filters.type === ''"
+            (click)="setTypeFilter('')"
+          >Tous</div>
+          <div
+            class="dropdown-item"
+            [class.selected]="filters.type === 'CLASSIC'"
+            (click)="setTypeFilter('CLASSIC')"
+          >Classique</div>
+          <div
+            class="dropdown-item"
+            [class.selected]="filters.type === 'TRANSACTIONAL'"
+            (click)="setTypeFilter('TRANSACTIONAL')"
+          >Transactionnelle</div>
+        </div>
+      </div>
+
+      <button
+        class="btn-reset"
+        *ngIf="filters.libelle || filters.status || filters.type"
+        (click)="resetFilters()"
+      >✕ Réinitialiser</button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+    <div class="view-toggle">
+      <button class="view-btn" [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'" title="Vue grille">⊞</button>
+      <button class="view-btn" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'" title="Vue liste">≡</button>
+    </div>
+  </div>
+
+  <!-- ═══ GRID VIEW ═══ -->
+  <div
+    class="campaigns-grid"
+    *ngIf="campaigns().length > 0 && viewMode === 'grid'; else listOrEmpty"
+  >
+    <div class="campaign-card" *ngFor="let campaign of campaigns()">
+      <div class="card-stripe" [ngClass]="getStripeClass(campaign.status)"></div>
+
+      <div class="card-body">
+        <div class="card-header">
+          <div class="card-header-left">
+            <h3 class="card-title">{{ campaign.libelle }}</h3>
+            <span class="card-type" [ngClass]="campaign.type === 'CLASSIC' ? 'classic' : 'transactional'">
+              {{ campaign.type === 'CLASSIC' ? 'Classique' : 'Transactionnelle' }}
+            </span>
+          </div>
+          <span class="status-badge" [ngClass]="getStatusClass(campaign.status)">
+            <span class="status-dot" *ngIf="campaign.status === 'RUNNING'"></span>
+            {{ getStatusLabel(campaign.status) }}
+          </span>
+        </div>
+
+        <p class="card-desc">{{ campaign.description || 'Aucune description' }}</p>
+
+        <div class="card-meta">
+          <div class="meta-row">
+            <span class="meta-icon">📅</span>
+            <span>
+              {{ campaign.startDate | date:'dd/MM/yyyy HH:mm' }}
+              →
+              {{ campaign.endDate | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+          </div>
+          <div class="meta-row" *ngIf="campaign.sendingWindow">
+            <span class="meta-icon">🕐</span>
+            <span>{{ getSendingWindowLabel(campaign.sendingWindow) }}</span>
+          </div>
+          <div class="meta-row" *ngIf="campaign.headerAlpha">
+            <span class="meta-icon">🏷️</span>
+            <span>{{ campaign.headerAlpha }}</span>
+          </div>
+        </div>
+
+        <!-- Progress bar uniquement pour campagnes en cours ou terminées -->
+        <div class="progress-bar" *ngIf="campaign.status === 'RUNNING' || campaign.status === 'COMPLETED' || campaign.status === 'STOPPED'">
+          <div class="progress-label">
+            <span>{{ getProgressLabel(campaign.status) }}</span>
+            <span>{{ getProgressPercent(campaign) }}%</span>
+          </div>
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              [ngClass]="getProgressClass(campaign.status)"
+              [style.width.%]="getProgressPercent(campaign)"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="footer-stats">
+          <div class="recipient-count">
+            {{ campaign.recipientCount ? (campaign.recipientCount | number) : '—' }}
+          </div>
+          <div class="recipient-label">
+            {{ campaign.type === 'TRANSACTIONAL' ? 'via API' : 'destinataires' }}
+          </div>
+        </div>
+        <div class="card-actions">
+          <button
+            class="action-btn"
+            title="Voir les détails"
+            (click)="viewDetails(campaign.id!)"
+          >👁</button>
+          <button
+            class="action-btn"
+            title="Modifier"
+            *ngIf="canEdit(campaign)"
+            (click)="editCampaign(campaign.id!)"
+          >✏️</button>
+          <button
+            class="action-btn success"
+            title="Valider"
+            *ngIf="canValidate(campaign)"
+            (click)="openValidationModal(campaign)"
+          >✓</button>
+          <button
+            class="action-btn danger"
+            title="Arrêter la campagne"
+            *ngIf="canStop(campaign)"
+            (click)="stopCampaign(campaign.id!)"
+          >⏹</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ LIST VIEW ═══ -->
+  <ng-template #listOrEmpty>
+    <ng-container *ngIf="campaigns().length > 0 && viewMode === 'list'; else noCampaigns">
+      <div class="campaigns-table-wrapper">
+        <table class="campaigns-table">
+          <thead>
+            <tr>
+              <th>Campagne</th>
+              <th>Statut</th>
+              <th>Type</th>
+              <th>Période</th>
+              <th>Destinataires</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let campaign of campaigns()">
+              <td>
+                <div class="table-title">{{ campaign.libelle }}</div>
+                <div class="table-sub">{{ campaign.headerAlpha }}</div>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(campaign.status)">
+                  <span class="status-dot" *ngIf="campaign.status === 'RUNNING'"></span>
+                  {{ getStatusLabel(campaign.status) }}
+                </span>
+              </td>
+              <td>
+                <span class="card-type" [ngClass]="campaign.type === 'CLASSIC' ? 'classic' : 'transactional'">
+                  {{ campaign.type === 'CLASSIC' ? 'Classique' : 'Transactionnelle' }}
+                </span>
+              </td>
+              <td class="table-date">
+                {{ campaign.startDate | date:'dd/MM/yy' }} → {{ campaign.endDate | date:'dd/MM/yy' }}
+              </td>
+              <td class="table-count">
+                {{ campaign.recipientCount ? (campaign.recipientCount | number) : '—' }}
+              </td>
+              <td>
+                <div class="card-actions">
+                  <button class="action-btn" title="Voir" (click)="viewDetails(campaign.id!)">👁</button>
+                  <button class="action-btn" title="Modifier" *ngIf="canEdit(campaign)" (click)="editCampaign(campaign.id!)">✏️</button>
+                  <button class="action-btn success" title="Valider" *ngIf="canValidate(campaign)" (click)="openValidationModal(campaign)">✓</button>
+                  <button class="action-btn danger" title="Arrêter" *ngIf="canStop(campaign)" (click)="stopCampaign(campaign.id!)">⏹</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+  </ng-template>
+
+  <!-- ═══ EMPTY STATE ═══ -->
+  <ng-template #noCampaigns>
+    <div class="empty-state">
+      <div class="empty-icon">📣</div>
+      <h3>Aucune campagne trouvée</h3>
+      <p *ngIf="filters.libelle || filters.status || filters.type">
+        Aucun résultat pour vos filtres actuels.
+        <button class="link-btn" (click)="resetFilters()">Réinitialiser les filtres</button>
+      </p>
+      <p *ngIf="!filters.libelle && !filters.status && !filters.type">
+        Créez votre première campagne pour commencer.
+      </p>
+      <button class="btn-primary" routerLink="/campaigns/create" *ngIf="!filters.libelle && !filters.status && !filters.type">
+        <span>＋</span> Créer une campagne
+      </button>
+    </div>
+  </ng-template>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages() > 1">
+    <button
+      class="page-btn"
+      [disabled]="currentPage() === 0"
+      (click)="goToPage(currentPage() - 1)"
+    >← Précédent</button>
+
+    <div class="page-numbers">
+      <button
+        class="page-num"
+        *ngFor="let p of getPagesArray()"
+        [class.active]="p === currentPage()"
+        (click)="goToPage(p)"
+      >{{ p + 1 }}</button>
+    </div>
+
+    <button
+      class="page-btn"
+      [disabled]="currentPage() === totalPages() - 1"
+      (click)="goToPage(currentPage() + 1)"
+    >Suivant →</button>
+  </div>
+
+</div>

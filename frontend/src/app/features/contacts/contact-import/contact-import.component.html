@@ -1,0 +1,182 @@
+<div class="modal-overlay" (click)="onCancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Importer un carnet d'adresses</h2>
+      <button class="btn-close" (click)="onCancel()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      @if (!uploadState().result) {
+        <!-- Instructions -->
+        <div class="instructions">
+          <div class="instruction-item">
+            <span class="number">1</span>
+            <div class="content">
+              <h4>Téléchargez le modèle CSV</h4>
+              <p>Utilisez notre modèle pour structurer vos données correctement</p>
+              <button class="btn-link" (click)="downloadTemplate()">
+                <span class="material-icons">download</span>
+                Télécharger le modèle
+              </button>
+            </div>
+          </div>
+
+          <div class="instruction-item">
+            <span class="number">2</span>
+            <div class="content">
+              <h4>Remplissez vos données</h4>
+              <p>Le fichier doit contenir : phone (obligatoire), firstName, lastName, email</p>
+            </div>
+          </div>
+
+          <div class="instruction-item">
+            <span class="number">3</span>
+            <div class="content">
+              <h4>Importez votre fichier</h4>
+              <p>Taille maximale : 30 MB • Format : CSV uniquement</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone de drop -->
+        @if (!uploadState().file) {
+          <div 
+            class="drop-zone"
+            [class.drag-over]="dragOver()"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+          >
+            <span class="material-icons">cloud_upload</span>
+            <h3>Glissez-déposez votre fichier CSV ici</h3>
+            <p>ou</p>
+            <label class="btn btn-primary">
+              <span class="material-icons">folder_open</span>
+              Parcourir les fichiers
+              <input 
+                type="file" 
+                accept=".csv"
+                (change)="onFileSelected($event)"
+                style="display: none;"
+              />
+            </label>
+          </div>
+        } @else {
+          <!-- Fichier sélectionné -->
+          <div class="file-selected">
+            <div class="file-info">
+              <span class="material-icons file-icon">description</span>
+              <div class="file-details">
+                <h4>{{ uploadState().file!.name }}</h4>
+                <p>{{ formatFileSize(uploadState().file!.size) }}</p>
+              </div>
+              @if (!uploadState().uploading) {
+                <button class="btn-remove" (click)="removeFile()">
+                  <span class="material-icons">close</span>
+                </button>
+              }
+            </div>
+
+            <!-- Progression -->
+            @if (uploadState().uploading) {
+              <div class="upload-progress">
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    [style.width.%]="uploadState().progress"
+                  ></div>
+                </div>
+                <p class="progress-text">
+                  Importation en cours... {{ uploadState().progress }}%
+                </p>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Erreur -->
+        @if (uploadState().error) {
+          <div class="alert alert-error">
+            <span class="material-icons">error</span>
+            {{ uploadState().error }}
+          </div>
+        }
+      } @else {
+        <!-- Résultat de l'import -->
+        <div class="import-result">
+          <div class="result-icon success">
+            <span class="material-icons">check_circle</span>
+          </div>
+          
+          <h3>Importation terminée !</h3>
+          
+          <div class="result-stats">
+            <div class="stat-card">
+              <span class="stat-number">{{ uploadState().result!.totalProcessed }}</span>
+              <span class="stat-label">Total traité</span>
+            </div>
+            <div class="stat-card success">
+              <span class="stat-number">{{ uploadState().result!.successCount }}</span>
+              <span class="stat-label">Importés</span>
+            </div>
+            @if (uploadState().result!.failureCount > 0) {
+              <div class="stat-card error">
+                <span class="stat-number">{{ uploadState().result!.failureCount }}</span>
+                <span class="stat-label">Erreurs</span>
+              </div>
+            }
+          </div>
+
+          @if (uploadState().result!.errors && uploadState().result!.errors!.length > 0) {
+            <div class="error-details">
+              <h4>Détails des erreurs :</h4>
+              <ul>
+                @for (error of uploadState().result!.errors; track error) {
+                  <li>{{ error }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      @if (!uploadState().result) {
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="onCancel()"
+          [disabled]="uploadState().uploading"
+        >
+          Annuler
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-primary"
+          (click)="uploadFile()"
+          [disabled]="!uploadState().file || uploadState().uploading"
+        >
+          @if (uploadState().uploading) {
+            <span class="spinner"></span>
+            Importation...
+          } @else {
+            <span class="material-icons">upload</span>
+            Importer
+          }
+        </button>
+      } @else {
+        <button 
+          type="button" 
+          class="btn btn-primary" 
+          (click)="imported.emit()"
+        >
+          <span class="material-icons">check</span>
+          Terminer
+        </button>
+      }
+    </div>
+  </div>
+</div>

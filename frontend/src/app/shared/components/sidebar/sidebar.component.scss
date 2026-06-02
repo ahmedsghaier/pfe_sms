@@ -1,0 +1,141 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: #1a3a6b;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  position: relative;
+
+  &.collapsed {
+    width: 72px;
+
+    .logo-text,
+    .nav-label {
+      display: none;
+    }
+
+    .sidebar__logo {
+      justify-content: center;
+      padding: 20px 0;
+    }
+
+    .collapse-btn {
+      position: absolute;
+      right: -12px;
+      top: 24px;
+    }
+
+    .nav-item {
+      justify-content: center;
+      padding: 14px 0;
+    }
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+
+    .logo-icon {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-text {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .logo-easy {
+      color: #ffffff;
+    }
+
+    .logo-bulk {
+      color: #5ab4e8;
+    }
+
+    .collapse-btn {
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.7);
+      transition: background 0.2s;
+      flex-shrink: 0;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+      }
+
+      .material-icons {
+        font-size: 18px;
+      }
+    }
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+    flex: 1;
+  }
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  position: relative;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+  }
+
+  &.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border-left-color: #5ab4e8;
+    font-weight: 600;
+  }
+
+  .nav-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+
+  .nav-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

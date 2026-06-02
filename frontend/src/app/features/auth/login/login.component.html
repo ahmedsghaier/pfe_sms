@@ -1,0 +1,96 @@
+<div class="login-container">
+
+  <div class="login-card-wrapper">
+    <div class="login-card">
+
+      <!-- Header : Logo + Titre -->
+      <div class="card-header">
+        <div class="logo-block">
+          <!--
+            CORRECTION LOGO :
+            - Utiliser l'image PNG avec fond transparent (logo seul, sans carré gris)
+            - Si votre fichier easybulk-logo.png a un fond gris, remplacez-le par
+              la version PNG à fond transparent
+            - Sinon, appliquer mix-blend-mode: multiply pour effacer le fond blanc/gris
+          -->
+          <img src="assets/images/easybulk-logo.png"
+               alt="EasyBulk Logo"
+               class="logo-img">
+          <!-- logo-text masqué via CSS display:none -->
+          <div class="logo-text" style="display:none">
+            <span class="logo-easy">Easy</span><span class="logo-bulk">Bulk</span>
+          </div>
+        </div>
+        <h1 class="card-title">Bienvenue Easybulk</h1>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+        <!-- Email -->
+        <div class="field-group">
+          <label>Email</label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="Email"
+            autocomplete="username">
+
+          <span class="field-error"
+                *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched">
+            L'email est requis
+          </span>
+          <span class="field-error"
+                *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched">
+            Email invalide
+          </span>
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="field-group">
+          <label>Mot de passe</label>
+          <div class="password-wrapper">
+            <input
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="Mot de passe"
+              autocomplete="current-password">
+
+            <button
+              type="button"
+              class="toggle-pw"
+              (click)="hidePassword = !hidePassword">
+              <mat-icon>
+                {{ hidePassword ? 'visibility_off' : 'visibility' }}
+              </mat-icon>
+            </button>
+          </div>
+
+          <span class="field-error"
+                *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">
+            Le mot de passe est requis
+          </span>
+        </div>
+
+        <!-- Mot de passe oublié -->
+        <div class="forgot-row">
+          <a (click)="forgotPassword()" class="forgot-link">Mot de passe oublié ?</a>
+        </div>
+
+        <!-- Erreur globale -->
+        <div class="global-error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <!-- Bouton -->
+        <button
+          type="submit"
+          class="btn-login"
+          [disabled]="loginForm.invalid || loading">
+          <mat-spinner diameter="22" *ngIf="loading"></mat-spinner>
+          <span *ngIf="!loading">Se Connecter</span>
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>

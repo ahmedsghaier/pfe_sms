@@ -1,0 +1,141 @@
+<div class="modal-overlay" (click)="onCancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>Ajouter un contact</h2>
+      <button class="btn-close" (click)="onCancel()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="modal-form">
+      
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="required">Téléphone</label>
+          <div class="phone-input-group">
+            <div class="country-selector">
+              <button type="button" class="country-btn" [class.open]="showCountryDropdown">
+                <span class="flag">{{ selectedCountry().flag }}</span>
+                <span class="code">{{ selectedCountry().code }}</span>
+                <span class="material-icons">arrow_drop_down</span>
+              </button>
+              <div class="country-dropdown">
+                @for (country of countries; track country.code) {
+                  <button type="button" class="country-option" (click)="onCountryChange(country)">
+                    <span class="flag">{{ country.flag }}</span>
+                    <span class="name">{{ country.name }}</span>
+                    <span class="code">{{ country.code }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+            <input 
+              type="tel" 
+              formControlName="phone"
+              placeholder="Numéro de téléphone"
+              class="form-control"
+              [class.invalid]="phoneControl?.invalid && phoneControl?.touched"
+            />
+          </div>
+          @if (phoneControl?.invalid && phoneControl?.touched) {
+            <div class="error-message">
+              @if (phoneControl?.errors?.['required']) { Le numéro de téléphone est obligatoire }
+              @if (phoneControl?.errors?.['pattern']) { Format de numéro invalide (8-15 chiffres) }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Nom</label>
+          <input type="text" formControlName="lastName" placeholder="Nom" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label>Prénom</label>
+          <input type="text" formControlName="firstName" placeholder="Prénom" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input 
+            type="email" 
+            formControlName="email"
+            placeholder="email@exemple.com"
+            class="form-control"
+            [class.invalid]="emailControl?.invalid && emailControl?.touched"
+          />
+          @if (emailControl?.invalid && emailControl?.touched) {
+            <div class="error-message">Format d'email invalide</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Tags</label>
+          <div class="tags-container">
+            @for (tag of selectedTags(); track tag) {
+              <span class="tag">
+                {{ tag }}
+                <button type="button" (click)="removeTag(tag)" class="tag-remove">
+                  <span class="material-icons">close</span>
+                </button>
+              </span>
+            }
+          </div>
+          <div class="tag-input-group">
+            <input 
+              type="text" 
+              placeholder="Ajouter un tag..."
+              class="form-control"
+              [value]="newTagInput()"
+              (input)="newTagInput.set($any($event.target).value)"
+              (keydown.enter)="$event.preventDefault(); addTag(newTagInput())"
+            />
+            <button 
+              type="button" 
+              class="btn-add-tag"
+              (click)="addTag(newTagInput())"
+              [disabled]="!newTagInput().trim()"
+            >
+              Ajouter
+            </button>
+          </div>
+          @if (availableTags().length > 0) {
+            <div class="suggested-tags">
+              <small>Tags suggérés :</small>
+              @for (tag of availableTags(); track tag) {
+                @if (!selectedTags().includes(tag)) {
+                  <button type="button" class="tag-suggestion" (click)="addTag(tag)">{{ tag }}</button>
+                }
+              }
+            </div>
+          }
+        </div>
+
+        @if (error()) {
+          <div class="alert alert-error">
+            <span class="material-icons">error</span>
+            {{ error() }}
+          </div>
+        }
+      </div>
+
+      <!-- ✅ footer DANS le form mais après modal-body -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="loading()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="loading() || contactForm.invalid">
+          @if (loading()) {
+            <span class="spinner"></span>
+            Enregistrement...
+          } @else {
+            <span class="material-icons">check</span>
+            Enregistrer
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

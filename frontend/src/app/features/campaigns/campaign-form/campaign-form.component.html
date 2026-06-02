@@ -1,0 +1,808 @@
+<div class="campaign-form-container">
+
+  <!-- Form Header -->
+  <div class="form-header">
+    <div class="form-header-left">
+      <button class="btn-back" (click)="cancel()">
+        <span class="back-arrow">←</span>
+        <span>Retour aux campagnes</span>
+      </button>
+      <h1 class="page-title">{{ isEditMode ? 'Modifier la campagne' : 'Nouvelle campagne' }}</h1>
+    </div>
+    <button class="btn-cancel" (click)="cancel()">Annuler</button>
+  </div>
+
+  <!-- Stepper -->
+  <div class="stepper">
+    <div class="stepper-track"></div>
+    <div
+      class="step"
+      *ngFor="let step of steps; let i = index"
+      [class.active]="currentStep() === i + 1"
+      [class.completed]="currentStep() > i + 1"
+    >
+      <div class="step-bubble" (click)="goToStepIfAllowed(i + 1)">
+        <span class="step-check" *ngIf="currentStep() > i + 1">✓</span>
+        <span *ngIf="currentStep() <= i + 1">{{ i + 1 }}</span>
+      </div>
+      <div class="step-label">{{ step.label }}</div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="campaignForm" (ngSubmit)="onSubmit()">
+
+    <!-- ══════════ STEP 1: Type & Message ══════════ -->
+    <div class="form-step" *ngIf="currentStep() === 1">
+
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon blue">📣</div>
+          <div>
+            <h2 class="section-title">Type de campagne</h2>
+            <p class="section-sub">Choisissez le mode d'envoi de votre campagne</p>
+          </div>
+        </div>
+
+        <div class="campaign-type-selector">
+          <label class="type-card" [class.selected]="campaignForm.get('type')?.value === 'CLASSIC'">
+            <input type="radio" formControlName="type" value="CLASSIC">
+            <div class="type-card-inner">
+              <div class="type-icon-wrap blue">📤</div>
+              <div>
+                <h3 class="type-title">Campagne Classique</h3>
+                <p class="type-desc">Envois groupés planifiés vers une audience définie</p>
+              </div>
+              <div class="type-check" *ngIf="campaignForm.get('type')?.value === 'CLASSIC'">✓</div>
+            </div>
+          </label>
+
+          <label class="type-card" [class.selected]="campaignForm.get('type')?.value === 'TRANSACTIONAL'">
+            <input type="radio" formControlName="type" value="TRANSACTIONAL">
+            <div class="type-card-inner">
+              <div class="type-icon-wrap purple">⚡</div>
+              <div>
+                <h3 class="type-title">Campagne Transactionnelle</h3>
+                <p class="type-desc">Messages automatisés déclenchés via API</p>
+              </div>
+              <div class="type-check" *ngIf="campaignForm.get('type')?.value === 'TRANSACTIONAL'">✓</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon green">💬</div>
+          <div>
+            <h2 class="section-title">Contenu du message</h2>
+            <p class="section-sub">Rédigez ou choisissez un modèle existant</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Utiliser un modèle <span class="optional-tag">optionnel</span></label>
+          <div class="select-with-icon">
+            <span class="select-icon">📋</span>
+            <select (change)="onTemplateSelect($event)" class="form-control">
+              <option value="">— Nouveau message personnalisé —</option>
+              <option *ngFor="let template of templates()" [value]="template.id">
+                {{ template.libelle }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Groupe de contacts <span class="required-star">*</span></label>
+          <div class="select-with-icon">
+            <span class="select-icon">👥</span>
+            <select formControlName="groupId" class="form-control"
+              [class.is-invalid]="campaignForm.get('groupId')?.invalid && campaignForm.get('groupId')?.touched">
+              <option value="">Sélectionner un groupe</option>
+              <option *ngFor="let group of groups()" [value]="group.id">{{ group.label }}</option>
+            </select>
+          </div>
+          <div class="field-error"
+               *ngIf="campaignForm.get('groupId')?.invalid && campaignForm.get('groupId')?.touched">
+            ⚠ Veuillez sélectionner un groupe
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Message <span class="required-star">*</span></label>
+          <div class="message-editor-wrapper">
+            <textarea
+              formControlName="messageTemplate"
+              class="form-control message-textarea"
+              rows="6"
+              placeholder="Rédigez votre message SMS ici…"
+              (input)="updateCharCount()"
+              [class.is-invalid]="campaignForm.get('messageTemplate')?.invalid && campaignForm.get('messageTemplate')?.touched"
+            ></textarea>
+
+            <div class="message-toolbar">
+              <div class="variables-group" *ngIf="campaignForm.get('type')?.value === 'CLASSIC'">
+                <span class="variables-label">Insérer :</span>
+                <button type="button" class="btn-variable" (click)="insertVariable('nom')">&#64;nom</button>
+                <button type="button" class="btn-variable" (click)="insertVariable('prenom')">&#64;prenom</button>
+                <button type="button" class="btn-variable" (click)="insertVariable('email')">&#64;email</button>
+                <button type="button" class="btn-variable" (click)="insertVariable('telephone')">&#64;telephone</button>
+              </div>
+              <div class="char-counter">
+                <div class="char-pill"
+                     [class.warn]="charCount() > 140"
+                     [class.danger]="charCount() > 160">
+                  {{ charCount() }} car.
+                </div>
+                <div class="page-pill">{{ pageCount() }} page(s)</div>
+              </div>
+            </div>
+          </div>
+          <div class="field-error"
+               *ngIf="campaignForm.get('messageTemplate')?.invalid && campaignForm.get('messageTemplate')?.touched">
+            ⚠ Le message est requis
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="toggle-label">
+            <div class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="saveAsTemplate" [ngModelOptions]="{standalone: true}">
+              <span class="toggle-track"></span>
+            </div>
+            <span>Sauvegarder comme modèle réutilisable</span>
+          </label>
+          <div class="template-name-input" *ngIf="saveAsTemplate">
+            <input
+              type="text"
+              [(ngModel)]="templateName"
+              [ngModelOptions]="{standalone: true}"
+              class="form-control"
+              placeholder="Nom du modèle…">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <div></div>
+        <button type="button" class="btn-primary" (click)="nextStep()" [disabled]="!isStep1Valid()">
+          Continuer → Contacts
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════ STEP 2: Contacts ══════════ -->
+    <div class="form-step" *ngIf="currentStep() === 2">
+
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon amber">🎯</div>
+          <div>
+            <h2 class="section-title">Sélection de l'audience</h2>
+            <p class="section-sub">Définissez les destinataires de votre campagne</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Filtrer par tags</label>
+          <select multiple formControlName="tags" class="form-control tags-select" size="5">
+            <option *ngFor="let tag of availableTags()" [value]="tag">{{ tag }}</option>
+          </select>
+          <p class="form-hint">💡 Maintenez Ctrl/Cmd pour sélectionner plusieurs tags</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Contacts individuels</label>
+          <div class="search-input-wrapper">
+            <span class="search-prefix">🔍</span>
+            <input
+              type="text"
+              class="form-control search-input"
+              placeholder="Rechercher par nom, prénom, email ou téléphone…"
+              (input)="searchContacts($event)">
+          </div>
+          <div class="selected-contacts" *ngIf="selectedContacts().length > 0">
+            <div class="contact-chip" *ngFor="let contact of selectedContacts()">
+              <span class="chip-avatar">
+                {{ contact.firstName?.charAt(0) }}{{ contact.lastName?.charAt(0) }}
+              </span>
+              {{ contact.firstName }} {{ contact.lastName }}
+              <button type="button" (click)="removeContact(contact)" class="chip-remove">×</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="audience-summary-card" *ngIf="audienceCount() > 0">
+          <h3 class="summary-title">📊 Résumé de l'audience</h3>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <div class="summary-value">{{ audienceCount() | number }}</div>
+              <div class="summary-label">Contacts</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-value">≈{{ estimatedMessages() | number }}</div>
+              <div class="summary-label">Messages</div>
+            </div>
+            <div class="summary-item" [class.insufficient]="!hasSufficientBudget()">
+              <div class="summary-value">{{ estimatedCost() }} DT</div>
+              <div class="summary-label">Coût estimé</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-value">{{ availableBudget() }} DT</div>
+              <div class="summary-label">Budget dispo.</div>
+            </div>
+          </div>
+
+          <div class="budget-bar">
+            <div class="budget-fill"
+                 [style.width.%]="getBudgetPercent()"
+                 [class.over]="!hasSufficientBudget()">
+            </div>
+          </div>
+
+          <div class="alert alert-warning" *ngIf="!hasSufficientBudget()">
+            ⚠️ Budget insuffisant — rechargez votre compte avant de lancer cette campagne.
+          </div>
+        </div>
+
+        <div class="empty-audience" *ngIf="audienceCount() === 0">
+          <span>👥</span>
+          <p>Sélectionnez des tags ou des contacts pour estimer l'audience.</p>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="previousStep()">← Retour</button>
+        <button type="button" class="btn-primary" (click)="nextStep()" [disabled]="!isStep2Valid()">
+          Continuer → Paramètres
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════ STEP 3: Paramètres ══════════ -->
+    <div class="form-step" *ngIf="currentStep() === 3">
+
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon purple">⚙️</div>
+          <div>
+            <h2 class="section-title">Paramètres de la campagne</h2>
+            <p class="section-sub">Configurez l'expéditeur, le planning et les options d'envoi</p>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Entête-Alpha (expéditeur) <span class="required-star">*</span></label>
+            <div class="select-with-icon">
+              <span class="select-icon">🏷️</span>
+              <select formControlName="headerAlpha" class="form-control">
+                <option value="">Sélectionner un expéditeur</option>
+                <option *ngFor="let header of availableHeaders()" [value]="header">{{ header }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Libellé de la campagne <span class="required-star">*</span></label>
+            <input type="text" formControlName="libelle" class="form-control"
+              placeholder="Ex : Promo Été 2026"
+              [class.is-invalid]="campaignForm.get('libelle')?.invalid && campaignForm.get('libelle')?.touched">
+            <div class="field-error"
+                 *ngIf="campaignForm.get('libelle')?.invalid && campaignForm.get('libelle')?.touched">
+              ⚠ Libellé requis
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description <span class="optional-tag">optionnel</span></label>
+          <textarea formControlName="description" class="form-control" rows="3"
+            placeholder="Description interne de la campagne…"></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Date de début <span class="required-star">*</span></label>
+            <input type="datetime-local" formControlName="startDate" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date de fin <span class="required-star">*</span></label>
+            <input type="datetime-local" formControlName="endDate" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Validité SMS (heures) <span class="required-star">*</span></label>
+            <input type="number" formControlName="validityHours" class="form-control" min="1" max="72">
+            <p class="form-hint">
+              Durée pendant laquelle l'opérateur tente de remettre le message (max 72h)
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Fenêtre d'envoi <span class="required-star">*</span></label>
+            <select formControlName="sendingWindow" class="form-control">
+              <option value="ALL_DAY">🌐 Tous les jours (24h/24)</option>
+              <option value="BUSINESS_HOURS">💼 Jours ouvrables (08h–18h)</option>
+              <option value="EVENING">🌙 Plage du soir (18h–22h)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="campaignForm.get('type')?.value === 'TRANSACTIONAL'">
+          <label class="toggle-label">
+            <div class="toggle-switch">
+              <input type="checkbox" formControlName="useOnlyMyApiKey">
+              <span class="toggle-track"></span>
+            </div>
+            <span>Utiliser uniquement ma clé API</span>
+          </label>
+          <p class="form-hint">Seules vos clés API pourront déclencher cette campagne</p>
+        </div>
+
+        <div class="schedule-alert"
+             *ngIf="campaignForm.get('startDate')?.value && campaignForm.get('endDate')?.value">
+          <span class="alert-icon">📅</span>
+          <span>
+            Campagne du
+            <strong>{{ campaignForm.get('startDate')?.value | date:'dd/MM/yyyy HH:mm' }}</strong>
+            au
+            <strong>{{ campaignForm.get('endDate')?.value | date:'dd/MM/yyyy HH:mm' }}</strong>
+            — fenêtre :
+            <strong>{{ getSendingWindowLabel(campaignForm.get('sendingWindow')?.value) }}</strong>
+          </span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="previousStep()">← Retour</button>
+        <button type="button" class="btn-primary" (click)="nextStep()" [disabled]="!isStep3Valid()">
+          Continuer → Validation
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════ STEP 4: Validation ══════════ -->
+    <div class="form-step" *ngIf="currentStep() === 4">
+
+      <!-- ═══════════════════════════════════════════════════════
+           BLOC 1 — ANALYSE IA
+      ════════════════════════════════════════════════════════ -->
+      <div class="form-section ai-section">
+
+        <div class="section-header">
+          <div class="section-icon purple">🤖</div>
+          <div>
+            <h2 class="section-title">Analyse Prédictive IA</h2>
+            <p class="section-sub">Optimisez votre campagne grâce au Machine Learning (Modèle v13)</p>
+          </div>
+        </div>
+
+        <!-- Bouton analyse -->
+        <button
+          type="button"
+          class="btn-analyze-ml"
+          (click)="predictEngagementInValidation()"
+          [disabled]="isPredicting() || !campaignForm.get('messageTemplate')?.value"
+          [class.loading]="isPredicting()">
+          <span class="spinner" *ngIf="isPredicting()"></span>
+          <span class="btn-icon" *ngIf="!isPredicting()">🔮</span>
+          <span>{{ isPredicting() ? 'Analyse en cours...' : 'Analyser avec l\'IA (Modèle v13)' }}</span>
+        </button>
+
+        <!-- Erreur ML -->
+        <div class="prediction-error" *ngIf="predictionError()">
+          ⚠️ {{ predictionError() }}
+        </div>
+
+        <!-- Résultats ML -->
+        <div class="ai-results" *ngIf="predictedRate() !== null">
+
+          <!-- ── 01. TYPE DE MESSAGE ──────────────────────────────────── -->
+          <div class="ai-block" *ngIf="nlpTypeDetected()">
+            <div class="ai-block-title">
+              <span class="ai-block-number">01</span>
+              Type de message détecté
+            </div>
+            <div class="nlp-type-card">
+              <span class="nlp-icon">{{ getNlpIcon(nlpTypeDetected()!) }}</span>
+              <div class="nlp-info">
+                <span class="nlp-name">{{ nlpTypeDetected() }}</span>
+                <span class="nlp-desc">{{ getNlpDescription(nlpTypeDetected()!) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 02. CRÉNEAU OPTIMAL ML ──────────────────────────────── -->
+          <div class="ai-block" *ngIf="bestTime() || bestWindow()">
+            <div class="ai-block-title">
+              <span class="ai-block-number">02</span>
+              Créneau optimal calculé par le ML
+            </div>
+
+            <div class="bw-cards-row">
+
+              <!-- Carte Heure de pic -->
+              <div class="bw-card" *ngIf="bestTime()">
+                <div class="bw-card-icon">⏰</div>
+                <div class="bw-card-body">
+                  <div class="bw-card-label">Heure de pic</div>
+                  <div class="bw-card-value">{{ bestTime() }}</div>
+                  <div class="bw-card-sub">Score le plus élevé</div>
+                </div>
+              </div>
+
+              <!-- Carte Intervalle optimal -->
+              <div class="bw-card" *ngIf="bestWindow()">
+                <div class="bw-card-icon">📊</div>
+                <div class="bw-card-body">
+                  <div class="bw-card-label">Intervalle optimal ML</div>
+                  <div class="bw-card-value">{{ bestWindow() }}</div>
+                  <div class="bw-card-sub">Fenêtre recommandée</div>
+                  <!-- Badge windowKey (ex: "↗ morning_priority") -->
+                  <div class="bw-card-badge" *ngIf="bestWindowKey()">
+                    ↗ {{ bestWindowKey() }}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ── 03. TOP FENÊTRES RECOMMANDÉES ──────────────────────── -->
+          <div class="ai-block" *ngIf="topWindows().length > 0">
+            <div class="ai-block-title">
+              <span class="ai-block-number">03</span>
+              Fenêtres d'envoi recommandées
+              <span class="ai-block-hint">
+                Cliquez pour adopter une fenêtre et recalculer votre taux
+              </span>
+            </div>
+
+            <div class="windows-grid">
+              <div
+                class="window-card"
+                *ngFor="let w of topWindows(); let i = index"
+                [class.window-card--gold]="i === 0"
+                [class.window-card--silver]="i === 1"
+                [class.window-card--selected]="selectedOptimalWindow() === w.windowKey"
+                (click)="selectOptimalWindow(w)"
+                role="button"
+                [attr.aria-label]="'Sélectionner ' + w.windowLabel">
+
+                <div class="window-rank">
+                  {{ i === 0 ? '🥇 Meilleure' : '🥈 2ème choix' }}
+                </div>
+                <div class="window-icon">{{ w.icon }}</div>
+                <div class="window-label">{{ w.windowLabel }}</div>
+                <div class="window-peak">Pic à {{ w.peakHour }}h00</div>
+                <div class="window-rate"
+                     [class.rate--high]="w.rate >= 70"
+                     [class.rate--medium]="w.rate >= 50 && w.rate < 70"
+                     [class.rate--low]="w.rate < 50">
+                  {{ w.rate | number:'1.1-1' }}%
+                </div>
+                <div class="window-rate-label">taux d'engagement estimé</div>
+                <div class="window-selected-mark" *ngIf="selectedOptimalWindow() === w.windowKey">
+                  ✓ Sélectionnée
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 04. TAUX + COMPARAISON ──────────────────────────────── -->
+          <div class="ai-block">
+            <div class="ai-block-title">
+              <span class="ai-block-number">{{ topWindows().length > 0 ? '04' : '03' }}</span>
+              Taux d'engagement — fenêtre actuelle
+              <span class="ai-block-hint">
+                « {{ getSendingWindowLabel(campaignForm.get('sendingWindow')?.value) }} »
+              </span>
+            </div>
+
+            <!-- Comparaison fenêtre actuelle vs meilleure ML
+                 Affichée uniquement si la ML recommande une fenêtre différente avec un meilleur taux -->
+            <div class="compare-row"
+                 *ngIf="topWindows().length > 0
+                        && topWindows()[0].windowKey !== campaignForm.get('sendingWindow')?.value
+                        && topWindows()[0].rate > predictedRate()!">
+
+              <!-- Fenêtre actuelle -->
+              <div class="compare-card compare-card--current">
+                <div class="compare-card-label">Votre fenêtre actuelle</div>
+                <div class="compare-card-name">
+                  {{ getSendingWindowLabel(campaignForm.get('sendingWindow')?.value) }}
+                </div>
+                <div class="compare-rate compare-rate--amber">
+                  {{ predictedRate() | number:'1.1-1' }}%
+                </div>
+                <div class="compare-rate-sub">taux d'engagement estimé</div>
+                <div class="compare-bar-track">
+                  <div class="compare-bar-fill compare-bar--amber"
+                       [style.width.%]="predictedRate()">
+                  </div>
+                </div>
+                <div class="compare-peak" *ngIf="bestTime()">
+                  ⏰ pic à {{ bestTime() }}
+                </div>
+              </div>
+
+              <!-- Séparateur + badge gain -->
+              <div class="compare-sep">
+                <div class="compare-vs">vs</div>
+                <div class="compare-gain">
+                  ↑ +{{ (topWindows()[0].rate - predictedRate()!) | number:'1.1-1' }}%
+                </div>
+              </div>
+
+              <!-- Meilleure fenêtre recommandée par le ML -->
+              <div class="compare-card compare-card--best">
+                <div class="compare-card-label compare-label--ml">✨ Recommandée par le ML</div>
+                <div class="compare-card-name compare-name--ml">
+                  {{ topWindows()[0].windowLabel }}
+                </div>
+                <div class="compare-rate compare-rate--purple">
+                  {{ topWindows()[0].rate | number:'1.1-1' }}%
+                </div>
+                <div class="compare-rate-sub compare-sub--ml">taux d'engagement estimé</div>
+                <div class="compare-bar-track compare-track--ml">
+                  <div class="compare-bar-fill compare-bar--purple"
+                       [style.width.%]="topWindows()[0].rate">
+                  </div>
+                </div>
+                <div class="compare-peak compare-peak--ml">
+                  ⏰ pic à {{ topWindows()[0].peakHour }}h00
+                </div>
+              </div>
+
+            </div>
+            <!-- /compare-row -->
+
+            <!-- Jauge circulaire + barre + détails -->
+            <div class="chosen-window-row">
+
+              <div class="rate-circle"
+                   [class.rate-circle--high]="predictedRate()! >= 70"
+                   [class.rate-circle--medium]="predictedRate()! >= 50 && predictedRate()! < 70"
+                   [class.rate-circle--low]="predictedRate()! < 50">
+                <span class="rate-circle-value">{{ predictedRate() | number:'1.1-1' }}%</span>
+                <span class="rate-circle-label">engagement</span>
+              </div>
+
+              <div class="chosen-window-detail">
+
+                <div class="rate-bar-track">
+                  <div class="rate-bar-fill"
+                       [style.width.%]="predictedRate()"
+                       [class.fill--high]="predictedRate()! >= 70"
+                       [class.fill--medium]="predictedRate()! >= 50 && predictedRate()! < 70"
+                       [class.fill--low]="predictedRate()! < 50">
+                  </div>
+                </div>
+                <div class="rate-bar-scale">
+                  <span>0%</span><span>50%</span><span>100%</span>
+                </div>
+
+                <!-- Score heure de début -->
+                <div class="chosen-hour-row" *ngIf="chosenHourScore() !== null">
+                  <span class="chosen-hour-label">
+                    Score heure de début
+                    ({{ campaignForm.get('startDate')?.value | date:'HH:mm' }}) :
+                  </span>
+                  <span class="chosen-hour-value"
+                        [class.value--good]="chosenHourScore()! >= 70"
+                        [class.value--ok]="chosenHourScore()! >= 50 && chosenHourScore()! < 70"
+                        [class.value--poor]="chosenHourScore()! < 50">
+                    {{ chosenHourScore() | number:'1.0-0' }}%
+                  </span>
+                </div>
+
+                <!-- Recommandation ML -->
+                <div class="recommendation-box"
+                     *ngIf="recommendation()"
+                     [class.rec--high]="predictedRate()! >= 70"
+                     [class.rec--medium]="predictedRate()! >= 50 && predictedRate()! < 70"
+                     [class.rec--low]="predictedRate()! < 50">
+                  <span class="rec-emoji">
+                    {{ predictedRate()! >= 70 ? '✅' : predictedRate()! >= 50 ? '⚠️' : '❌' }}
+                  </span>
+                  <span class="rec-text">{{ recommendation() }}</span>
+                </div>
+
+              </div>
+            </div>
+            <!-- /chosen-window-row -->
+
+          </div><!-- /ai-block taux -->
+
+        </div><!-- /ai-results -->
+
+        <!-- ML a répondu mais sans données exploitables -->
+        <div class="ai-no-data"
+             *ngIf="!isPredicting() && !predictionError() && predictedRate() === null && nlpTypeDetected() !== null">
+          ℹ️ Le modèle ML n'a pas retourné de données pour ce message.
+        </div>
+
+      </div><!-- /ai-section -->
+
+
+      <!-- ═══════════════════════════════════════════════════════
+           BLOC 2 — RÉCAPITULATIF
+      ════════════════════════════════════════════════════════ -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon green">✅</div>
+          <div>
+            <h2 class="section-title">Récapitulatif & Validation</h2>
+            <p class="section-sub">Vérifiez les informations puis envoyez un test avant de finaliser</p>
+          </div>
+        </div>
+
+        <div class="recap-card">
+          <div class="recap-columns">
+
+            <!-- Colonne Informations générales -->
+            <div class="recap-col">
+              <div class="recap-section-title">Informations générales</div>
+              <div class="recap-row">
+                <span class="recap-key">Expéditeur</span>
+                <span class="recap-val">{{ campaignForm.get('headerAlpha')?.value || '—' }}</span>
+              </div>
+              <div class="recap-row">
+                <span class="recap-key">Libellé</span>
+                <span class="recap-val">{{ campaignForm.get('libelle')?.value || '—' }}</span>
+              </div>
+              <div class="recap-row">
+                <span class="recap-key">Type</span>
+                <span class="recap-val">
+                  <span class="recap-badge"
+                    [ngClass]="campaignForm.get('type')?.value === 'CLASSIC' ? 'classic' : 'transactional'">
+                    {{ campaignForm.get('type')?.value === 'CLASSIC' ? 'Classique' : 'Transactionnelle' }}
+                  </span>
+                </span>
+              </div>
+              <div class="recap-row" *ngIf="nlpTypeDetected()">
+                <span class="recap-key">Type IA</span>
+                <span class="recap-val">
+                  <span class="recap-badge ai-badge">
+                    {{ getNlpIcon(nlpTypeDetected()!) }} {{ nlpTypeDetected() }}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Colonne Planning -->
+            <div class="recap-col">
+              <div class="recap-section-title">Planning</div>
+              <div class="recap-row">
+                <span class="recap-key">Début</span>
+                <span class="recap-val mono">
+                  {{ campaignForm.get('startDate')?.value | date:'dd/MM/yyyy HH:mm' }}
+                </span>
+              </div>
+              <div class="recap-row">
+                <span class="recap-key">Fin</span>
+                <span class="recap-val mono">
+                  {{ campaignForm.get('endDate')?.value | date:'dd/MM/yyyy HH:mm' }}
+                </span>
+              </div>
+              <div class="recap-row">
+                <span class="recap-key">Fenêtre</span>
+                <span class="recap-val">
+                  {{ getSendingWindowLabel(campaignForm.get('sendingWindow')?.value) }}
+                </span>
+              </div>
+              <div class="recap-row" *ngIf="bestWindow()">
+                <span class="recap-key">Créneau ML</span>
+                <span class="recap-val mono">
+                  <strong>{{ bestWindow() }}</strong>
+                  <span *ngIf="bestTime()"> (pic {{ bestTime() }})</span>
+                </span>
+              </div>
+              <div class="recap-row" *ngIf="predictedRate() !== null">
+                <span class="recap-key">Taux prévu</span>
+                <span class="recap-val"
+                      [class.text-success]="predictedRate()! >= 70"
+                      [class.text-warning]="predictedRate()! >= 50 && predictedRate()! < 70"
+                      [class.text-danger]="predictedRate()! < 50">
+                  <strong>{{ predictedRate() | number:'1.1-1' }}%</strong>
+                </span>
+              </div>
+            </div>
+
+            <!-- Colonne Budget -->
+            <div class="recap-col">
+              <div class="recap-section-title">Budget</div>
+              <div class="recap-row">
+                <span class="recap-key">Contacts</span>
+                <span class="recap-val mono">{{ audienceCount() | number }}</span>
+              </div>
+              <div class="recap-row">
+                <span class="recap-key">Messages ≈</span>
+                <span class="recap-val mono">{{ estimatedMessages() | number }}</span>
+              </div>
+              <div class="recap-row">
+                <span class="recap-key">Coût estimé</span>
+                <span class="recap-val mono" [class.text-danger]="!hasSufficientBudget()">
+                  {{ estimatedCost() }} DT
+                </span>
+              </div>
+              <div class="recap-row">
+                <span class="recap-key">Budget dispo.</span>
+                <span class="recap-val mono">{{ availableBudget() }} DT</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Test SMS ──────────────────────────────────────────── -->
+        <div class="test-section">
+          <div class="test-header">
+            <div class="test-icon">📱</div>
+            <div>
+              <h3 class="test-title">Test obligatoire</h3>
+              <p class="test-desc">
+                Envoyez un SMS de test pour valider le rendu avant l'enregistrement
+              </p>
+            </div>
+            <div class="test-status-badge success" *ngIf="testSent()">✓ Test envoyé</div>
+          </div>
+          <div class="test-input-row">
+            <input
+              type="tel"
+              [(ngModel)]="testPhoneNumber"
+              [ngModelOptions]="{standalone: true}"
+              class="form-control"
+              placeholder="+216 XX XXX XXX">
+            <button
+              type="button"
+              class="btn-primary"
+              (click)="sendTest()"
+              [disabled]="!testPhoneNumber || testSent()">
+              {{ testSent() ? '✓ Envoyé' : '📤 Envoyer le test' }}
+            </button>
+          </div>
+          <div class="alert alert-success" *ngIf="testSent()">
+            ✓ Message de test envoyé au {{ testPhoneNumber }}
+          </div>
+        </div>
+
+        <!-- ── Confirmation ──────────────────────────────────────── -->
+        <label class="confirm-label" [class.disabled]="!testSent()">
+          <input
+            type="checkbox"
+            [(ngModel)]="confirmTest"
+            [ngModelOptions]="{standalone: true}"
+            [disabled]="!testSent()">
+          <span class="confirm-text">
+            J'ai bien reçu le message de test et je confirme le contenu
+          </span>
+        </label>
+
+        <div class="alert alert-warning" *ngIf="!hasSufficientBudget()">
+          ⚠️ Budget insuffisant — la campagne sera enregistrée mais ne pourra pas être lancée.
+        </div>
+
+      </div><!-- /recap section -->
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="previousStep()">← Retour</button>
+        <button
+          type="submit"
+          class="btn-primary btn-submit"
+          [disabled]="!confirmTest || campaignForm.invalid || isSubmitting()">
+          <span *ngIf="isSubmitting()" class="spinner"></span>
+          {{ isSubmitting() ? 'Enregistrement…' : getSubmitButtonText() }}
+        </button>
+      </div>
+
+    </div>
+    <!-- ══════════ FIN STEP 4 ══════════ -->
+
+  </form>
+</div>

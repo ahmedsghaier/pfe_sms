@@ -1,0 +1,351 @@
+<div class="users-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Utilisateurs</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn-filter" (click)="toggleFilter()">
+        <span class="material-icons">filter_list</span>
+        Filtrer
+      </button>
+      <button class="btn-invite" (click)="openInviteModal()">
+        <span class="material-icons">person_add</span>
+        Inviter
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Panel -->
+  <div class="filter-panel" [class.expanded]="filterVisible">
+    <div class="filter-row">
+      <input type="text" class="filter-input" placeholder="Prénom" [(ngModel)]="filters.firstName" />
+      <input type="text" class="filter-input" placeholder="Nom" [(ngModel)]="filters.lastName" />
+      <select class="filter-select" [(ngModel)]="filters.status">
+        <option value="">Statut</option>
+        <option value="active">Actif</option>
+        <option value="inactive">Inactif</option>
+      </select>
+      <select class="filter-select" [(ngModel)]="filters.group">
+        <option value="">Groupes</option>
+        <option *ngFor="let g of groups" [value]="g.id">{{ g.name }}</option>
+      </select>
+      <select class="filter-select" [(ngModel)]="filters.role">
+        <option value="">Rôles</option>
+        <option value="superadmin">Superadmin</option>
+        <option value="admin">Administrateur</option>
+        <option value="superviseur">Superviseur</option>
+        <option value="agent">Agent</option>
+        <option value="visionneur">Visionneur</option>
+      </select>
+      <div class="filter-actions">
+        <button class="btn-icon btn-apply" (click)="applyFilters()" title="Appliquer">
+          <span class="material-icons">filter_alt</span>
+        </button>
+        <button class="btn-icon btn-reset" (click)="resetFilters()" title="Réinitialiser">
+          <span class="material-icons">filter_alt_off</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Nom et Prénom</th>
+          <th>Email</th>
+          <th>Groupes/Rôles</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers" [class.pending]="user.status === 'pending'">
+          <td class="user-name">
+            <div class="avatar" [style.background]="getAvatarColor(user)">
+              {{ getInitials(user) }}
+            </div>
+            <span>{{ user.firstName || '--' }} {{ user.lastName || '' }}</span>
+          </td>
+          <td class="user-email">{{ user.email }}</td>
+          <td class="user-roles">
+            <span *ngFor="let role of user.roles" class="role-badge">
+              {{ role.group }} / {{ role.role }}
+            </span>
+            <span *ngIf="user.isViewer" class="role-badge viewer">-- / Visionneur</span>
+            <span *ngIf="user.isSuperadmin" class="role-badge superadmin">-- / Superadmin</span>
+          </td>
+          <td>
+            <label class="toggle" [title]="user.status === 'pending' ? 'Invitation en attente' : ''">
+              <input
+                type="checkbox"
+                [checked]="user.active"
+                [disabled]="user.status === 'pending'"
+                (change)="toggleUserStatus(user)"
+              />
+              <span class="slider"></span>
+            </label>
+          </td>
+          <td class="actions-cell">
+            <button
+              class="action-btn edit"
+              (click)="openEditModal(user)"
+              title="Modifier"
+              *ngIf="!user.isViewer && !user.isSuperadmin"
+            >
+              <span class="material-icons">edit</span>
+            </button>
+            <button class="action-btn view" (click)="openViewModal(user)" title="Consulter">
+              <span class="material-icons">visibility</span>
+            </button>
+            <button class="action-btn info" (click)="openCampaignModal(user)" title="Détails campagnes">
+              <span class="material-icons">info</span>
+            </button>
+            <button
+              class="action-btn delete"
+              (click)="confirmDeleteInvitation(user)"
+              title="Supprimer invitation"
+              *ngIf="user.status === 'pending'"
+            >
+              <span class="material-icons">close</span>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredUsers.length === 0">
+          <td colspan="5" class="empty-state">
+            <span class="material-icons">person_off</span>
+            <p>Aucun utilisateur trouvé</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <button class="page-btn" (click)="goToPage(1)" [disabled]="currentPage === 1">«</button>
+    <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button>
+    <button
+      class="page-btn"
+      *ngFor="let p of pages"
+      [class.active]="p === currentPage"
+      (click)="goToPage(p)"
+    >{{ p }}</button>
+    <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">›</button>
+    <button class="page-btn" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages">»</button>
+  </div>
+</div>
+
+<!-- ===== INVITE MODAL ===== -->
+<div class="modal-overlay" *ngIf="showInviteModal" (click)="closeModals()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Inviter un nouvel utilisateur</h2>
+      <button class="modal-close" (click)="closeModals()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Email <span class="required">*</span></label>
+        <div class="input-with-icon">
+          <input type="email" [(ngModel)]="inviteForm.email" placeholder="utilisateur@exemple.com" />
+          <span class="material-icons valid-icon" *ngIf="isValidEmail(inviteForm.email)">check</span>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="viewerRoleEnabled">
+        <label>Ajouter un rôle visionneur <span class="required">*</span></label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="isViewer" [value]="true" [(ngModel)]="inviteForm.isViewer" />
+            <span class="radio-custom"></span>
+            Oui
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="isViewer" [value]="false" [(ngModel)]="inviteForm.isViewer" />
+            <span class="radio-custom active"></span>
+            Non
+          </label>
+        </div>
+      </div>
+
+      <ng-container *ngIf="!inviteForm.isViewer">
+        <div class="roles-section" *ngFor="let roleEntry of inviteForm.roles; let i = index">
+          <label>Groupe/Rôle <span class="required">*</span></label>
+          <div class="role-row">
+            <select class="filter-select flex-1" [(ngModel)]="roleEntry.group">
+              <option value="">Sélectionner un groupe</option>
+              <option *ngFor="let g of groups" [value]="g.id">{{ g.name }}</option>
+            </select>
+            <select class="filter-select flex-1" [(ngModel)]="roleEntry.role">
+              <option value="">Sélectionner un rôle</option>
+              <option value="admin">Administrateur</option>
+              <option value="superviseur">Superviseur</option>
+              <option value="agent">Agent</option>
+            </select>
+            <button class="btn-icon btn-danger" (click)="removeRoleEntry(i)" *ngIf="inviteForm.roles.length > 1">
+              <span class="material-icons">delete</span>
+            </button>
+          </div>
+        </div>
+        <button class="btn-add-role" (click)="addRoleEntry()">
+          <span class="material-icons">add_circle</span>
+          Ajouter un groupe/rôle
+        </button>
+      </ng-container>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeModals()">Annuler</button>
+      <button class="btn-primary" (click)="submitInvite()">Inviter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VIEW MODAL ===== -->
+<div class="modal-overlay" *ngIf="showViewModal" (click)="closeModals()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Consulter utilisateur</h2>
+      <button class="modal-close" (click)="closeModals()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedUser">
+      <div class="form-group">
+        <label>Nom <span class="required">*</span></label>
+        <input type="text" [value]="selectedUser.lastName" readonly class="readonly-input" />
+      </div>
+      <div class="form-group">
+        <label>Prénom <span class="required">*</span></label>
+        <input type="text" [value]="selectedUser.firstName" readonly class="readonly-input" />
+      </div>
+      <div class="form-group">
+        <label>Email <span class="required">*</span></label>
+        <input type="text" [value]="selectedUser.email" readonly class="readonly-input" />
+      </div>
+      <div class="form-group">
+        <label>Ajouter un rôle visionneur <span class="required">*</span></label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" [checked]="selectedUser.isViewer" disabled />
+            <span class="radio-custom" [class.active]="selectedUser.isViewer"></span> Oui
+          </label>
+          <label class="radio-label">
+            <input type="radio" [checked]="!selectedUser.isViewer" disabled />
+            <span class="radio-custom" [class.active]="!selectedUser.isViewer"></span> Non
+          </label>
+        </div>
+      </div>
+      <div class="form-group" *ngFor="let role of selectedUser.roles">
+        <label>Groupe/Rôle <span class="required">*</span></label>
+        <div class="role-row">
+          <select class="filter-select flex-1" disabled>
+            <option>{{ role.group }}</option>
+          </select>
+          <select class="filter-select flex-1" disabled>
+            <option>{{ role.role }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeModals()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT MODAL ===== -->
+<div class="modal-overlay" *ngIf="showEditModal" (click)="closeModals()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Modifier utilisateur</h2>
+      <button class="modal-close" (click)="closeModals()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="editForm">
+      <div class="form-group">
+        <label>Nom <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="editForm.lastName" />
+      </div>
+      <div class="form-group">
+        <label>Prénom <span class="required">*</span></label>
+        <input type="text" [(ngModel)]="editForm.firstName" />
+      </div>
+      <div class="form-group">
+        <label>Email <span class="required">*</span></label>
+        <input type="text" [value]="editForm.email" readonly class="readonly-input" />
+      </div>
+      <div class="roles-section" *ngFor="let roleEntry of editForm.roles; let i = index">
+        <label>Groupe/Rôle <span class="required">*</span></label>
+        <div class="role-row">
+          <select class="filter-select flex-1" [(ngModel)]="roleEntry.group">
+            <option *ngFor="let g of groups" [value]="g.id">{{ g.name }}</option>
+          </select>
+          <select class="filter-select flex-1" [(ngModel)]="roleEntry.role">
+            <option value="admin">Administrateur</option>
+            <option value="superviseur">Superviseur</option>
+            <option value="agent">Agent</option>
+          </select>
+          <button class="btn-icon btn-danger" (click)="removeEditRoleEntry(i)" *ngIf="editForm.roles.length > 1">
+            <span class="material-icons">delete</span>
+          </button>
+        </div>
+      </div>
+      <button class="btn-add-role" (click)="addEditRoleEntry()">
+        <span class="material-icons">add_circle</span>
+        Ajouter un groupe/rôle
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeModals()">Annuler</button>
+      <button class="btn-primary" (click)="submitEdit()">Inviter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CAMPAIGN DETAIL MODAL ===== -->
+<div class="modal-overlay" *ngIf="showCampaignModal" (click)="closeModals()">
+  <div class="modal modal-small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Campagnes de l'utilisateur</h2>
+      <button class="modal-close" (click)="closeModals()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="modal-body campaign-stats" *ngIf="selectedUser">
+      <div class="stat-row">
+        <div class="stat-icon pending-icon">
+          <span class="material-icons">schedule</span>
+        </div>
+        <span class="stat-label">Campagnes en attente :</span>
+        <span class="stat-value">{{ selectedUser.campaignStats?.pending || 0 }}</span>
+      </div>
+      <div class="stat-row">
+        <div class="stat-icon running-icon">
+          <span class="material-icons">sync</span>
+        </div>
+        <span class="stat-label">Campagnes en cours :</span>
+        <span class="stat-value">{{ selectedUser.campaignStats?.running || 0 }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONFIRM STATUS MODAL ===== -->
+<div class="modal-overlay" *ngIf="showConfirmModal" (click)="cancelConfirm()">
+  <div class="modal modal-confirm" (click)="$event.stopPropagation()">
+    <div class="confirm-icon">
+      <span class="material-icons">warning_amber</span>
+    </div>
+    <h2>{{ confirmMessage }}</h2>
+    <p class="confirm-sub" *ngIf="confirmSubMessage">{{ confirmSubMessage }}</p>
+    <div class="confirm-actions">
+      <button class="btn-yes" (click)="executeConfirm()">Oui</button>
+      <button class="btn-no" (click)="cancelConfirm()">Non</button>
+    </div>
+  </div>
+</div>

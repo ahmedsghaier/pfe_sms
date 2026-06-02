@@ -1,0 +1,43 @@
+<aside class="sidebar" [class.collapsed]="collapsed">
+  <!-- Logo -->
+  <div class="sidebar__logo">
+    <div class="logo-icon">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="18" fill="white" fill-opacity="0.15"/>
+        <path d="M10 14 Q18 8 26 14 Q26 22 18 26 Q10 22 10 14Z"
+              stroke="white" stroke-width="1.5" fill="none"/>
+        <circle cx="14" cy="19" r="2" fill="white"/>
+        <circle cx="18" cy="19" r="2" fill="white"/>
+        <circle cx="22" cy="19" r="2" fill="white"/>
+      </svg>
+    </div>
+
+    <span class="logo-text" *ngIf="!collapsed">
+      <span class="logo-easy">Easy</span><span class="logo-bulk">Bulk</span>
+    </span>
+
+    <!-- ✅ CLICK FIX -->
+    <button class="collapse-btn" (click)="toggleSidebar()">
+      <span class="material-icons">
+        {{ collapsed ? 'chevron_right' : 'chevron_left' }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sidebar__nav">
+    <a
+      *ngFor="let item of navItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: item.route === '/' }"
+      class="nav-item"
+    >
+      <span class="material-icons nav-icon">{{ item.icon }}</span>
+
+      <span class="nav-label" *ngIf="!collapsed">
+        {{ item.label }}
+      </span>
+    </a>
+  </nav>
+</aside>

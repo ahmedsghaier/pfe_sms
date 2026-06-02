@@ -1,0 +1,167 @@
+<!-- ══════════════════════════════════════════
+     message-template-list.component.html
+══════════════════════════════════════════ -->
+<div class="template-list-container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">Modèles de Messages</h1>
+      <p class="page-subtitle">{{ templates().length }} modèle(s) disponible(s)</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <span>＋</span> Nouveau Modèle
+    </button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Rechercher un modèle…"
+        [(ngModel)]="searchQuery"
+        (input)="applySearch()"
+      />
+    </div>
+    <div class="toolbar-divider"></div>
+    <div class="filter-dropdown-wrapper">
+      <button class="filter-pill" [class.active]="filterType !== ''" (click)="toggleTypeDropdown()">
+        Type <span class="pill-badge" *ngIf="filterType !== ''">1</span> ▾
+      </button>
+      <div class="dropdown-menu" *ngIf="showTypeDropdown">
+        <div class="dropdown-item" [class.selected]="filterType === ''" (click)="setTypeFilter('')">Tous</div>
+        <div class="dropdown-item" [class.selected]="filterType === 'CLASSIC'" (click)="setTypeFilter('CLASSIC')">
+          <span class="dropdown-dot dot-classic"></span> Classique
+        </div>
+        <div class="dropdown-item" [class.selected]="filterType === 'TRANSACTIONAL'" (click)="setTypeFilter('TRANSACTIONAL')">
+          <span class="dropdown-dot dot-transactional"></span> Transactionnelle
+        </div>
+      </div>
+    </div>
+    <button class="btn-reset" *ngIf="searchQuery || filterType" (click)="resetFilters()">✕ Réinitialiser</button>
+  </div>
+
+  <!-- Templates Grid -->
+  <div class="templates-grid" *ngIf="filteredTemplates().length > 0; else noTemplates">
+    <div class="template-card" *ngFor="let tpl of filteredTemplates()">
+      <div class="template-card-header">
+        <div class="template-card-header-left">
+          <h3 class="template-title">{{ tpl.libelle }}</h3>
+          <span class="template-type-badge" [ngClass]="tpl.type === 'CLASSIC' ? 'classic' : 'transactional'">
+            {{ tpl.type === 'CLASSIC' ? 'Classique' : 'Transactionnelle' }}
+          </span>
+        </div>
+        <div class="template-actions">
+          <button class="action-btn" title="Utiliser dans une campagne" (click)="useInCampaign(tpl)">📣</button>
+          <button class="action-btn" title="Modifier" (click)="editTemplate(tpl)">✏️</button>
+          <button class="action-btn danger" title="Supprimer" (click)="deleteTemplate(tpl.id!)">🗑</button>
+        </div>
+      </div>
+
+      <div class="template-message">
+        <p class="message-preview">{{ tpl.message }}</p>
+        <div class="message-stats">
+          <span class="stat-chip">{{ getCharCount(tpl.message) }} car.</span>
+          <span class="stat-chip">{{ getPageCount(tpl.message) }} page(s)</span>
+          <span class="stat-chip arabic" *ngIf="hasArabic(tpl.message)">🔤 Arabe</span>
+        </div>
+      </div>
+
+      <div class="template-variables" *ngIf="getVariables(tpl.message).length > 0">
+        <span class="variables-label">Variables :</span>
+        <span class="variable-tag" *ngFor="let v of getVariables(tpl.message)">{{ v }}</span>
+      </div>
+
+      <div class="template-footer">
+        <span class="template-date">
+          Créé le {{ tpl.createdAt | date:'dd/MM/yyyy' }}
+        </span>
+        <button class="btn-use" (click)="useInCampaign(tpl)">
+          Utiliser → Nouvelle campagne
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noTemplates>
+    <div class="empty-state">
+      <div class="empty-icon">💬</div>
+      <h3>Aucun modèle trouvé</h3>
+      <p *ngIf="searchQuery || filterType">Aucun résultat pour votre recherche.
+        <button class="link-btn" (click)="resetFilters()">Réinitialiser</button>
+      </p>
+      <p *ngIf="!searchQuery && !filterType">Créez votre premier modèle de message réutilisable.</p>
+      <button class="btn-primary" (click)="openCreateModal()" *ngIf="!searchQuery && !filterType">
+        <span>＋</span> Créer un modèle
+      </button>
+    </div>
+  </ng-template>
+
+</div>
+
+<!-- ═══ CREATE / EDIT MODAL ═══ -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editingTemplate ? 'Modifier le modèle' : 'Nouveau modèle' }}</h2>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nom du modèle <span class="required-star">*</span></label>
+        <input type="text" class="form-control" [(ngModel)]="modalForm.libelle" placeholder="Ex : Bienvenue client">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Type <span class="required-star">*</span></label>
+        <div class="type-toggle">
+          <button type="button" class="type-toggle-btn" [class.active]="modalForm.type === 'CLASSIC'" (click)="modalForm.type = 'CLASSIC'">
+            📤 Classique
+          </button>
+          <button type="button" class="type-toggle-btn" [class.active]="modalForm.type === 'TRANSACTIONAL'" (click)="modalForm.type = 'TRANSACTIONAL'">
+            ⚡ Transactionnelle
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Message <span class="required-star">*</span></label>
+        <div class="message-editor-wrapper">
+          <textarea
+            class="form-control message-textarea"
+            rows="6"
+            [(ngModel)]="modalForm.message"
+            (input)="updateModalCharCount()"
+            placeholder="Rédigez votre message…"
+          ></textarea>
+          <div class="message-toolbar">
+            <div class="variables-group" *ngIf="modalForm.type === 'CLASSIC'">
+              <span class="variables-label">Insérer :</span>
+              <button type="button" class="btn-variable" (click)="insertModalVariable('nom')">&#64;nom</button>
+              <button type="button" class="btn-variable" (click)="insertModalVariable('prenom')">&#64;prenom</button>
+              <button type="button" class="btn-variable" (click)="insertModalVariable('email')">&#64;email</button>
+              <button type="button" class="btn-variable" (click)="insertModalVariable('telephone')">&#64;telephone</button>
+            </div>
+            <div class="char-counter">
+              <div class="char-pill" [class.warn]="modalCharCount > 140" [class.danger]="modalCharCount > 160">
+                {{ modalCharCount }} car.
+              </div>
+              <div class="page-pill">{{ modalPageCount }} page(s)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeModal()">Annuler</button>
+      <button class="btn-primary" (click)="saveTemplate()" [disabled]="!isModalValid() || isSaving">
+        <span class="spinner" *ngIf="isSaving"></span>
+        {{ isSaving ? 'Enregistrement…' : (editingTemplate ? 'Mettre à jour' : 'Créer le modèle') }}
+      </button>
+    </div>
+  </div>
+</div>

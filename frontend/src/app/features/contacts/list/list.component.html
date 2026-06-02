@@ -1,0 +1,140 @@
+<div class="contact-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Carnet d'adresse</h1>
+    <div class="actions">
+      <button class="btn btn-primary" (click)="showAddForm.set(true)">
+        <span class="material-icons">add</span>
+        Ajouter un contact
+      </button>
+      <button class="btn btn-secondary" (click)="showImportForm.set(true)">
+        <span class="material-icons">upload</span>
+        Importer un fichier
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input 
+      type="text" 
+      placeholder="Rechercher par téléphone, nom, prénom ou email..."
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+      class="search-input"
+    />
+    @if (selectedContacts().size > 0) {
+      <button class="btn btn-danger" (click)="deleteSelected()">
+        <span class="material-icons">delete</span>
+        Supprimer ({{selectedContacts().size}})
+      </button>
+    }
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading">Chargement...</div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  }
+
+  <!-- Contacts Table -->
+  @if (!loading() && contacts().length > 0) {
+    <div class="table-container">
+      <table class="contacts-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" /></th>
+            <th>Téléphone</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Tags</th>
+            <th>Date d'ajout</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (contact of contacts(); track contact.id) {
+            <tr>
+              <td>
+                <input 
+                  type="checkbox" 
+                  [checked]="selectedContacts().has(contact.id!)"
+                  (change)="toggleContactSelection(contact.id!)"
+                />
+              </td>
+              <td>{{ contact.phone }}</td>
+              <td>{{ contact.lastName || '-' }}</td>
+              <td>{{ contact.firstName || '-' }}</td>
+              <td>{{ contact.email || '-' }}</td>
+              <td>
+                @for (tag of contact.tags; track tag) {
+                  <span class="tag">{{ tag }}</span>
+                }
+              </td>
+              <td>{{ contact.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="btn-icon" title="Modifier">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button class="btn-icon" title="Voir">
+                  <span class="material-icons">visibility</span>
+                </button>
+                <button class="btn-icon text-danger" title="Supprimer">
+                  <span class="material-icons">delete</span>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button 
+        [disabled]="currentPage() === 0"
+        (click)="onPageChange(currentPage() - 1)"
+      >
+        Précédent
+      </button>
+      <span>Page {{ currentPage() + 1 }} sur {{ totalPages() }}</span>
+      <button 
+        [disabled]="currentPage() >= totalPages() - 1"
+        (click)="onPageChange(currentPage() + 1)"
+      >
+        Suivant
+      </button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && contacts().length === 0) {
+    <div class="empty-state">
+      <span class="material-icons">contacts</span>
+      <p>Aucun contact trouvé</p>
+      <button class="btn btn-primary" (click)="showAddForm.set(true)">
+        Ajouter votre premier contact
+      </button>
+    </div>
+  }
+
+  <!-- Modals -->
+  @if (showAddForm()) {
+    <app-contact-form 
+      (contactCreated)="onContactCreated()"
+      (cancelled)="showAddForm.set(false)"
+    />
+  }
+
+  @if (showImportForm()) {
+    <app-contact-import 
+      (imported)="onContactsImported()"
+      (cancelled)="showImportForm.set(false)"
+    />
+  }
+</div>
