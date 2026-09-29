@@ -1,0 +1,104 @@
+@startuml
+left to right direction
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Super Administrateur" as SA
+actor "Administrateur" as ADM
+actor "Superviseur" as SUP
+actor "Agent" as AG
+
+actor "SMS Recommender\nService" as SMS
+actor "AI Timing\nService" as TIMING
+
+rectangle "Plateforme EasyBulk" {
+
+    usecase "S'authentifier" as AUTH
+
+    usecase "Gérer les groupes" as GROUP
+    usecase "Gérer les utilisateurs" as USERS
+    usecase "Gérer les contacts" as CONTACTS
+
+    usecase "Consulter les performances" as PERF
+    usecase "Suivre les campagnes" as FOLLOW
+    usecase "Valider la campagne" as VALIDATE
+
+    usecase "Créer une campagne" as CREATE
+    usecase "Rédiger un message" as WRITE
+    usecase "Paramétrer la campagne" as CONFIG
+    usecase "Sélectionner les destinataires" as RECIPIENTS
+
+    usecase "Compléter le mot\n en cours de saisie" as COMPLETE
+    usecase "Suggérer le mot suivant" as NEXTWORD
+
+    usecase "Recommander le meilleur\nmoment d'envoi" as RECOMMEND_TIME
+    usecase "Choisir le moment\nd'envoi" as CHOOSE_TIME
+}
+
+' =========================
+' Authentification
+' =========================
+
+SA --> AUTH
+ADM --> AUTH
+SUP --> AUTH
+AG --> AUTH
+
+' =========================
+' Super Administrateur
+' =========================
+
+SA --> GROUP
+SA --> USERS
+SA --> FOLLOW
+SA --> PERF
+
+' =========================
+' Administrateur
+' =========================
+
+ADM --> GROUP
+ADM --> USERS
+ADM --> CONTACTS
+ADM --> FOLLOW
+ADM --> PERF
+
+' =========================
+' Superviseur
+' =========================
+
+SUP --> VALIDATE
+SUP --> FOLLOW
+SUP --> PERF
+
+' =========================
+' Agent
+' =========================
+
+AG --> CREATE
+AG --> CHOOSE_TIME
+
+CREATE ..> WRITE : <<include>>
+CREATE ..> CONFIG : <<include>>
+CREATE ..> RECIPIENTS : <<include>>
+
+' =========================
+' SMS Recommender Service
+' =========================
+
+WRITE ..> COMPLETE : <<extend>>
+WRITE ..> NEXTWORD : <<extend>>
+
+SMS --> COMPLETE
+SMS --> NEXTWORD
+
+' =========================
+' AI Timing Service
+' =========================
+
+TIMING --> RECOMMEND_TIME
+
+RECOMMEND_TIME ..> CHOOSE_TIME : <<extend>>
+
+@enduml

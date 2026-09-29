@@ -226,6 +226,74 @@ services:
           memory: 1024m
 
   # ========================================
+  # SMS RECOMMENDER SERVICE (NOUVEAU)
+  # ========================================
+  sms-recommender-service:
+    build:
+      context: ./backend
+      dockerfile: sms-recommender-service/Dockerfile
+    container_name: easybulk-sms-recommender-service
+    restart: unless-stopped
+    ports:
+      - "8087:8087"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/easybulk_sms_recommender?authSource=admin
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      PYTHON_ML_URL: http://python-ml-service:5000
+      JWT_SECRET: ${JWT_SECRET}
+      SPRING_PROFILES_ACTIVE: docker
+      JAVA_OPTS: "-Xms128m -Xmx256m"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      python-ml-service:
+        condition: service_healthy
+    networks:
+      - easybulk-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8087/api/v1/sms-recommender/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+  # ========================================
+  # PYTHON ML SERVICE (moteur SMSRecommender v2)
+  # ========================================
+  python-ml-service:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    container_name: easybulk-python-ml-service
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./ml/models:/app/models
+      - ./ml/logs:/app/logs
+    networks:
+      - easybulk-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 1024m
+        reservations:
+          memory: 512m
+  # ========================================
   # API GATEWAY
   # ========================================
   api-gateway:
@@ -253,6 +321,8 @@ services:
       sms-gateway-service:
         condition: service_started
       ai-timing-service:  # 🆕 Ajouter la dépendance
+        condition: service_healthy
+      sms-recommender-service:        # 🆕 Ajouté
         condition: service_healthy
     networks:
       - easybulk-network

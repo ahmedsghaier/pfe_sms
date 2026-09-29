@@ -7,13 +7,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class EngagementPredictionResponse {
 
+    // ── Champs existants (inchangés) ─────────────────────────────────────
     @JsonProperty("nlp_type")
     private String nlpType;
 
@@ -32,9 +35,27 @@ public class EngagementPredictionResponse {
     private String recommendation;
     private List<WindowScore> topWindows;
 
-    // ── Sous-objet fenêtre optimale ──────────────────────────────────────
+    // ── Champs ajoutés pour Thompson Sampling ────────────────────────────
+
+    @JsonProperty("sms_id")
+    private String smsId;                      // UUID retourné au frontend pour feedback
+
+    @JsonProperty("recommended_hour")
+    private Integer recommendedHour;           // heure finale choisie par le bandit TS
+    // (peut différer de bestHour du modèle Python)
+
+    @JsonProperty("selection_method")
+    private String selectionMethod;            // "ts_ml_hybrid" | "explore" | "ml_only"
+
+    @JsonProperty("hourly_scores")
+    private Map<Integer, Double> hourlyScores; // {7: 0.31, 8: 0.72, 9: 0.81, ...}
+    // scores ML par heure, utilisés par BanditService
+
+    // ── Sous-objet fenêtre optimale (inchangé) ───────────────────────────
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class WindowScore {
         private String windowKey;    // "BUSINESS_HOURS" | "EVENING" | "ALL_DAY"
         private String windowLabel;  // "Jours ouvrables (08h–18h)"

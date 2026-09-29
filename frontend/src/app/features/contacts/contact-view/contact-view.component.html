@@ -1,0 +1,78 @@
+<div class="modal-backdrop" (click)="closed.emit()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="avatar avatar-lg" [attr.style]="avatarColor()">{{ initials() }}</div>
+      <div class="modal-title">
+        <h2>{{ contact().firstName }} {{ contact().lastName }}</h2>
+        <span class="modal-subtitle">{{ relativeDate() }}</span>
+      </div>
+      <button class="btn-icon close-btn" (click)="closed.emit()" title="Fermer (Échap)">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="detail-row">
+        <span class="detail-label">
+          <span class="material-icons field-icon">mail</span>
+          Email
+        </span>
+        <div class="detail-value-row">
+          <span class="detail-value">{{ contact().email || '—' }}</span>
+          @if (contact().email) {
+            <button class="btn-copy" (click)="copy('email')" title="Copier l'email">
+              <span class="material-icons">{{ copiedField() === 'email' ? 'check' : 'content_copy' }}</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">
+          <span class="material-icons field-icon">call</span>
+          Téléphone
+        </span>
+        <div class="detail-value-row">
+          <span class="detail-value">{{ contact().phone | phoneFormat }}</span>
+          <button class="btn-copy" (click)="copy('phone')" title="Copier le téléphone">
+            <span class="material-icons">{{ copiedField() === 'phone' ? 'check' : 'content_copy' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">
+          <span class="material-icons field-icon">sell</span>
+          Tags
+        </span>
+        <span class="detail-value tags-cell">
+          @for (tag of contact().tags; track tag) {
+            <span class="tag" [attr.data-tag]="tag">{{ tag }}</span>
+          } @empty {
+            <span class="empty-value">Aucun tag</span>
+          }
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">
+          <span class="material-icons field-icon">event</span>
+          Date d'ajout
+        </span>
+        <span class="detail-value">{{ contact().createdAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-icon text-danger" (click)="onDelete()" title="Supprimer">
+        <span class="material-icons">delete</span>
+      </button>
+      <div class="footer-spacer"></div>
+      <button class="btn btn-secondary" (click)="closed.emit()">Fermer</button>
+      <button class="btn btn-primary" (click)="onEdit()">
+        <span class="material-icons">edit</span>
+        Modifier
+      </button>
+    </div>
+  </div>
+</div>

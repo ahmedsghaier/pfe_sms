@@ -437,11 +437,15 @@ form {
   select.form-control { padding-left: 2.25rem; }
 }
 
-/* ── Message editor ── */
+/* ── Message editor ──
+   NOTE: overflow retiré (était "hidden") — il clippait le dropdown
+   de suggestions ML qui est positionné en absolute au-dessus du
+   textarea (bottom: calc(100% + 4px)). Le radius visuel est
+   maintenant appliqué directement sur le textarea et la toolbar. */
 .message-editor-wrapper {
   border: 1.5px solid var(--gray-200);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow: visible;
   transition: border-color var(--transition);
 
   &:focus-within {
@@ -452,7 +456,7 @@ form {
 
 .message-textarea {
   border: none !important;
-  border-radius: 0 !important;
+  border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
   box-shadow: none !important;
   resize: vertical;
   font-family: 'DM Mono', monospace;
@@ -469,6 +473,7 @@ form {
   padding: 0.625rem 0.875rem;
   background: var(--gray-50);
   border-top: 1px solid var(--gray-100);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
   flex-wrap: wrap;
   gap: 0.5rem;
 }
@@ -1625,5 +1630,61 @@ form {
     gap: 1rem;
 
     button { width: 100%; }
+  }
+}
+.sms-editor-wrapper {
+  position: relative;
+
+  .suggestions-dropdown {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--surface-border, #e5e7eb);
+    border-radius: 10px;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    overflow: hidden;
+
+    .suggestions-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text-color-secondary, #6b7280);
+      border-bottom: 1px solid var(--surface-border, #e5e7eb);
+
+      .suggestions-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: inherit;
+        font-size: 12px;
+        padding: 0 4px;
+      }
+    }
+
+    .suggestion-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+
+      &:hover { background: #f8fafc; }
+
+      .suggestion-word { font-weight: 500; font-size: 14px; }
+
+      .suggestion-score {
+        font-size: 11px;
+        color: #6b7280;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 10px;
+      }
+    }
   }
 }

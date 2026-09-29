@@ -308,6 +308,7 @@ public class CampaignService {
                     .chosenHourScore(chosenHourScore)
                     .recommendation(recommendation)
                     .topWindows(topWindows)
+                    .hourlyScores(hourlyScores)
                     .build();
 
         } catch (Exception e) {
@@ -536,6 +537,7 @@ public class CampaignService {
                 .chosenHourScore(null)
                 .recommendation("Service ML indisponible. Veuillez reessayer.")
                 .topWindows(List.of())           // liste vide, pas de fausses données
+                .hourlyScores(Map.of())
                 .build();
     }
 

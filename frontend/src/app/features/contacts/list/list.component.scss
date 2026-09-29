@@ -1,19 +1,44 @@
+// ==========================================================================
+// Variables
+// ==========================================================================
+$color-primary: #4f6ef7;
+$color-primary-dark: #3d5ce0;
+$color-danger: #e53e5c;
+$color-danger-dark: #c8304a;
+$color-text: #1a1d29;
+$color-text-muted: #6b7280;
+$color-border: #e5e7eb;
+$color-bg-page: #f4f6f9;
+$color-bg-card: #ffffff;
+$color-bg-hover: #f8f9fc;
+$color-bg-selected: #eef1ff;
+
+$radius-sm: 8px;
+$radius-md: 12px;
+$radius-full: 999px;
+
+// ==========================================================================
+// Layout
+// ==========================================================================
 .contact-container {
-  padding: 24px;
   max-width: 1400px;
   margin: 0 auto;
+  padding: 32px;
+  background: $color-bg-page;
+  min-height: 100vh;
 }
 
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 24px;
 
   h1 {
-    font-size: 28px;
-    font-weight: 600;
-    color: #1e293b;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $color-text;
+    margin: 0;
   }
 
   .actions {
@@ -22,159 +47,362 @@
   }
 }
 
+// ==========================================================================
+// Buttons
+// ==========================================================================
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: $radius-sm;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+
+  .material-icons { font-size: 20px; }
+
+  &:active { transform: scale(0.97); }
+
+  &-primary {
+    background: $color-primary;
+    color: #fff;
+    &:hover { background: $color-primary-dark; }
+  }
+
+  &-secondary {
+    background: #fff;
+    color: $color-text;
+    border: 1px solid $color-border;
+    &:hover { background: $color-bg-hover; }
+  }
+
+  &-danger {
+    background: $color-danger;
+    color: #fff;
+    &:hover { background: $color-danger-dark; }
+  }
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: $radius-sm;
+  color: $color-text-muted;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  .material-icons { font-size: 19px; }
+
+  &:hover {
+    background: $color-bg-hover;
+    color: $color-text;
+  }
+
+  &.text-danger:hover {
+    background: rgba($color-danger, 0.08);
+    color: $color-danger;
+  }
+}
+
+// ==========================================================================
+// Search bar
+// ==========================================================================
 .search-bar {
   display: flex;
+  align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+}
 
-  .search-input {
-    flex: 1;
-    padding: 12px 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 14px;
+.search-input-wrapper {
+  position: relative;
+  flex: 1;
 
-    &:focus {
-      outline: none;
-      border-color: #3b82f6;
-    }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $color-text-muted;
+    font-size: 20px;
   }
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 42px;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  font-size: 0.95rem;
+  background: $color-bg-card;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
+  }
+
+  &::placeholder { color: $color-text-muted; }
+}
+
+// ==========================================================================
+// Table
+// ==========================================================================
+.table-container {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+  overflow: hidden;
+  overflow-x: auto;
 }
 
 .contacts-table {
   width: 100%;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-collapse: collapse;
 
-  thead {
-    background: #f8fafc;
+  th, td {
+    padding: 14px 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
 
-    th {
-      padding: 12px 16px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 14px;
-      color: #64748b;
+  thead th {
+    background: #fafbfc;
+    color: $color-text-muted;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid $color-border;
+  }
+
+  .col-checkbox { width: 40px; }
+  .col-actions { width: 130px; }
+
+  tbody tr {
+    border-bottom: 1px solid $color-border;
+    transition: background-color 0.12s ease;
+    cursor: pointer;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background-color: $color-bg-hover; }
+
+    &.selected-row {
+      background-color: $color-bg-selected;
+      &:hover { background-color: darken($color-bg-selected, 2%); }
     }
   }
 
-  tbody {
-    tr {
-      border-top: 1px solid #e2e8f0;
-
-      &:hover {
-        background: #f8fafc;
-      }
-
-      td {
-        padding: 12px 16px;
-        font-size: 14px;
-        color: #1e293b;
-      }
-    }
+  td {
+    color: $color-text;
+    font-size: 0.9rem;
   }
+
+  input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: $color-primary;
+  }
+}
+
+.contact-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #eef1ff;
+  color: $color-primary;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.contact-full-name {
+  font-weight: 500;
+}
+
+.phone-cell { font-variant-numeric: tabular-nums; }
+
+.email-cell {
+  color: $color-text-muted;
+}
+
+.empty-value {
+  color: #c4c8d0;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 2px;
+}
+
+// ==========================================================================
+// Tags
+// ==========================================================================
+.tags-cell {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .tag {
   display: inline-block;
-  padding: 4px 12px;
-  background: #e0e7ff;
-  color: #3730a3;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  margin-right: 4px;
+  padding: 3px 11px;
+  border-radius: $radius-full;
+  font-size: 0.76rem;
+  font-weight: 600;
+  background: #eef0f4;
+  color: #4b5568;
+
+  &[data-tag="Client"] { background: #dbeafe; color: #1e40af; }
+  &[data-tag="Newsletter"] { background: #ede9fe; color: #6d28d9; }
+  &[data-tag="Prospect"] { background: #fef3c7; color: #92400e; }
+  &[data-tag="VIP"] { background: #fce7f3; color: #9d174d; }
+  &[data-tag="Archivé"] { background: #f3f4f6; color: #6b7280; }
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &.btn-primary {
-    background: #3b82f6;
-    color: white;
-
-    &:hover {
-      background: #2563eb;
-    }
-  }
-
-  &.btn-secondary {
-    background: white;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
-
-    &:hover {
-      background: #f8fafc;
-    }
-  }
-
-  &.btn-danger {
-    background: #ef4444;
-    color: white;
-
-    &:hover {
-      background: #dc2626;
-    }
-  }
+// ==========================================================================
+// Skeleton loader
+// ==========================================================================
+@keyframes skeleton-pulse {
+  0%   { opacity: 0.6; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.6; }
 }
 
+.skeleton {
+  background: #e9ebef;
+  border-radius: 6px;
+  animation: skeleton-pulse 1.3s ease-in-out infinite;
+}
+
+.skeleton-row td { padding: 16px; }
+.skeleton-text { height: 14px; }
+.skeleton-checkbox { width: 16px; height: 16px; }
+.skeleton-tag { width: 60px; height: 20px; border-radius: $radius-full; }
+.skeleton-actions { width: 90px; height: 20px; }
+
+// ==========================================================================
+// Pagination
+// ==========================================================================
 .pagination {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 16px;
-  margin-top: 24px;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding: 4px 4px;
+}
 
-  button {
-    padding: 8px 16px;
-    border: 1px solid #e2e8f0;
-    background: white;
-    border-radius: 6px;
-    cursor: pointer;
+.pagination-info {
+  font-size: 0.85rem;
+  color: $color-text-muted;
+}
 
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 
-    &:not(:disabled):hover {
-      background: #f8fafc;
-    }
+.btn-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border: 1px solid $color-border;
+  background: $color-bg-card;
+  border-radius: $radius-sm;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: $color-text;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  .material-icons { font-size: 18px; }
+
+  &:hover:not(:disabled) { background: $color-bg-hover; }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
+}
+
+.page-indicator {
+  font-size: 0.85rem;
+  color: $color-text-muted;
+}
+
+// ==========================================================================
+// Error & empty states
+// ==========================================================================
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba($color-danger, 0.08);
+  color: $color-danger-dark;
+  border-radius: $radius-sm;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
 }
 
 .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
   text-align: center;
-  padding: 60px 20px;
 
   .material-icons {
-    font-size: 64px;
-    color: #cbd5e1;
-    margin-bottom: 16px;
+    font-size: 48px;
+    color: #d1d5db;
+    margin-bottom: 12px;
   }
 
   p {
-    color: #64748b;
-    margin-bottom: 24px;
+    color: $color-text-muted;
+    margin: 0 0 16px;
+    font-size: 0.95rem;
   }
 }
 
-.loading, .error-message {
-  text-align: center;
-  padding: 40px;
-  color: #64748b;
-}
+// ==========================================================================
+// Responsive
+// ==========================================================================
+@media (max-width: 768px) {
+  .contact-container { padding: 16px; }
 
-.error-message {
-  color: #ef4444;
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .search-bar { flex-direction: column; align-items: stretch; }
+
+  .pagination {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
 }

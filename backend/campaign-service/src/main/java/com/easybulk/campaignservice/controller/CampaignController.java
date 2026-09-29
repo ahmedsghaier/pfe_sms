@@ -7,7 +7,10 @@ import com.easybulk.campaignservice.dto.ValidateCampaignRequest;
 import com.easybulk.campaignservice.dto.EngagementPredictionRequest;
 import com.easybulk.campaignservice.dto.EngagementPredictionResponse;
 import com.easybulk.campaignservice.model.Campaign;
+import com.easybulk.campaignservice.model.SmsDecisionLog;
 import com.easybulk.campaignservice.model.SmsLog;
+import com.easybulk.campaignservice.repository.SmsDecisionLogRepository;
+import com.easybulk.campaignservice.service.BanditService;
 import com.easybulk.campaignservice.service.CampaignService;
 import com.easybulk.common.dto.ApiResponse;
 import jakarta.validation.Valid;
@@ -17,6 +20,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -142,20 +149,58 @@ public class CampaignController {
                 campaignId, PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.success(logs));
     }
+    // Ajouter aux injections existantes
+    private final BanditService banditService;
+    private final SmsDecisionLogRepository decisionLogRepo;
+
+    // Remplacer predictEngagement() :
     @PostMapping("/predict-engagement")
     public ResponseEntity<ApiResponse<EngagementPredictionResponse>> predictEngagement(
-            @RequestHeader(value = "X-Organization-Id", required = false) String organizationId,
+            @RequestHeader(value = "X-Organization-Id", required = false) String orgId,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
             @Valid @RequestBody EngagementPredictionRequest request) {
 
-        log.info("Prediction request for message length: {}",
-                request.getMessageTemplate().length());
-
+        // 1. Appel Python — INCHANGÉ
         EngagementPredictionResponse prediction =
                 campaignService.predictEngagement(request);
 
-        return ResponseEntity.ok(
-                ApiResponse.success("Prédiction effectuée avec succès", prediction)
+        // 2. Clé contexte bandit
+        String contextKey = banditService.buildContextKey(
+                request.getCampaignType(),
+                request.getOperateur(),
+                prediction.getNlpType(),
+                LocalDate.now().getDayOfWeek().getValue() - 1
         );
+
+        // 3. Décision Thompson Sampling
+        BanditService.BanditDecision decision = banditService.selectHour(
+                contextKey, prediction.getHourlyScores()
+        );
+
+        // 4. Persister la décision
+        String smsId = UUID.randomUUID().toString();
+        decisionLogRepo.save(SmsDecisionLog.builder()
+                .smsId(smsId)
+                .organizationId(orgId)
+                .nlpType(prediction.getNlpType())
+                .operateur(request.getOperateur())
+                .campaignType(request.getCampaignType())
+                .dayOfWeek(LocalDate.now().getDayOfWeek().getValue() - 1)
+                .contextKey(contextKey)
+                .recommendedHour(decision.getSelectedHour())
+                .mlScore(decision.getMlScore())
+                .selectionMethod(decision.getMethod())
+                .decidedAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusDays(90))
+                .build()
+        );
+
+        // 5. Enrichir la réponse
+        prediction.setSmsId(smsId);
+        prediction.setRecommendedHour(decision.getSelectedHour());
+        prediction.setSelectionMethod(decision.getMethod());
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Prédiction effectuée avec succès", prediction));
     }
 }

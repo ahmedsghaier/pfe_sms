@@ -47,6 +47,9 @@ public class TimingPredictionService {
                     .build();
 
             // 4. Appel au modèle Python
+            // NOTE : pythonBridge.predict() reclassifie désormais le nlp_type via
+            // nlp_detector.py (Darija, Vœux, Alerte, etc.) et le renvoie dans
+            // predictionResult sous la clé "nlp_type" — voir buildResponse() ci-dessous.
             Map<String, Object> predictionResult = pythonBridge.predict(
                     request.getCampaignType(),
                     request.getOperateur(),
@@ -99,7 +102,11 @@ public class TimingPredictionService {
                 .method((String) result.get("method"))
                 .hourlyScores(buildHourlyScores(hourlyCurve))
                 .metadata(Map.of(
-                        "nlp_type", request.getNlpType(),
+                        // ← CORRIGÉ : on prend le type réellement détecté par
+                        // nlp_detector.py (propagé via PythonBridgeService),
+                        // avec repli sur request.getNlpType() si absent
+                        // (ex: match=null / erreur Python totale).
+                        "nlp_type", result.getOrDefault("nlp_type", request.getNlpType()),
                         "campaign_type", request.getCampaignType(),
                         "operateur", request.getOperateur(),
                         "model_version", "v13",

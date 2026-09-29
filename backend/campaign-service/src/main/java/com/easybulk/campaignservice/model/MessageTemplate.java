@@ -1,5 +1,6 @@
 package com.easybulk.campaignservice.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,12 +24,15 @@ public class MessageTemplate {
 
     private String organizationId;
 
+    @JsonProperty("libelle")
     private String name;
 
+    @JsonProperty("message")
     private String content;
 
     private TemplateType type;
 
+    @JsonProperty("status")
     private boolean active;
 
     private LocalDateTime createdAt;
@@ -36,7 +40,7 @@ public class MessageTemplate {
     private LocalDateTime updatedAt;
 
     public enum TemplateType {
-        CLASSIC,           // Variables @nom, @prénom, @email, @téléphone
-        TRANSACTIONAL      // Variables {{variable}}
+        CLASSIC,
+        TRANSACTIONAL
     }
 }

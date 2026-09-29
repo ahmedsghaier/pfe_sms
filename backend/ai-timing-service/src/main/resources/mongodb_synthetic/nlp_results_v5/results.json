@@ -1,0 +1,182 @@
+{
+  "version": "v5-final-corrected",
+  "dataset": "sms_dataset_v6",
+  "best_model": "LinearSVC (C=0.1)",
+  "corrections_applied": {
+    "post_corrections": "Applied with word boundaries",
+    "deduplication": 3097,
+    "augmentation": 552
+  },
+  "metrics": {
+    "domaine": {
+      "train_acc": 0.8595228301110655,
+      "test_acc": 0.8301886792452831,
+      "test_f1_weighted": 0.8416943126155547,
+      "test_f1_macro": 0.6584252299015488,
+      "overfitting_gap": 0.029334150865782394,
+      "f1_immobilier": 0.9688073394495412,
+      "f1_telecom": 0.8774928774928775
+    },
+    "type": {
+      "train_acc": 0.9718222953517072,
+      "test_acc": 0.967654986522911,
+      "test_f1_weighted": 0.9676473562495761,
+      "overfitting_gap": 0.0041673088287961235
+    }
+  },
+  "comparison": {
+    "v1 Original": {
+      "f1_dom": 0.557,
+      "f1_immo": 0.057,
+      "f1_tel": 0.328,
+      "gap": 0.083
+    },
+    "v3 Hybrid": {
+      "f1_dom": 0.558,
+      "f1_immo": 0.171,
+      "f1_tel": 0.355,
+      "gap": 0.12
+    },
+    "v4": {
+      "f1_dom": 0.558,
+      "f1_immo": 0.171,
+      "f1_tel": 0.355,
+      "gap": 0.12
+    },
+    "v5 (actuel)": {
+      "f1_dom": 0.8416943126155547,
+      "f1_immo": 0.9688073394495412,
+      "f1_tel": 0.8774928774928775,
+      "gap": 0.029334150865782394
+    }
+  },
+  "domain_analysis": {
+    "Immobilier": {
+      "n": 281,
+      "acc": 0.94,
+      "f1": 0.969,
+      "confusions": [
+        {
+          "from": "Immobilier",
+          "to": "Marketing",
+          "count": 7
+        },
+        {
+          "from": "Immobilier",
+          "to": "Logistique",
+          "count": 3
+        },
+        {
+          "from": "Immobilier",
+          "to": "Assurance",
+          "count": 2
+        }
+      ]
+    },
+    "Télécom": {
+      "n": 197,
+      "acc": 0.782,
+      "f1": 0.877,
+      "confusions": [
+        {
+          "from": "Télécom",
+          "to": "Marketing",
+          "count": 17
+        },
+        {
+          "from": "Télécom",
+          "to": "Banque",
+          "count": 12
+        },
+        {
+          "from": "Télécom",
+          "to": "Support",
+          "count": 8
+        }
+      ]
+    },
+    "Assurance": {
+      "n": 13,
+      "acc": 0.385,
+      "f1": 0.556,
+      "confusions": [
+        {
+          "from": "Assurance",
+          "to": "Administration",
+          "count": 4
+        },
+        {
+          "from": "Assurance",
+          "to": "Banque",
+          "count": 1
+        },
+        {
+          "from": "Assurance",
+          "to": "Éducation",
+          "count": 1
+        }
+      ]
+    },
+    "Éducation": {
+      "n": 7,
+      "acc": 0.429,
+      "f1": 0.6,
+      "confusions": [
+        {
+          "from": "Éducation",
+          "to": "Administration",
+          "count": 2
+        },
+        {
+          "from": "Éducation",
+          "to": "Assurance",
+          "count": 2
+        }
+      ]
+    },
+    "Santé": {
+      "n": 76,
+      "acc": 0.921,
+      "f1": 0.959,
+      "confusions": [
+        {
+          "from": "Santé",
+          "to": "Éducation",
+          "count": 4
+        },
+        {
+          "from": "Santé",
+          "to": "Administration",
+          "count": 1
+        },
+        {
+          "from": "Santé",
+          "to": "Assurance",
+          "count": 1
+        }
+      ]
+    },
+    "Marketing": {
+      "n": 133,
+      "acc": 0.88,
+      "f1": 0.936,
+      "confusions": [
+        {
+          "from": "Marketing",
+          "to": "RH",
+          "count": 10
+        },
+        {
+          "from": "Marketing",
+          "to": "Immobilier",
+          "count": 3
+        },
+        {
+          "from": "Marketing",
+          "to": "Télécom",
+          "count": 1
+        }
+      ]
+    }
+  }
+}

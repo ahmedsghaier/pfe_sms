@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal ,OnDestroy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,7 +9,8 @@ import { MessageTemplate } from '../../../shared/models/message-template.model';
 import { FormsModule } from '@angular/forms';
 import { GroupsService } from '../../../core/services/groups.service';
 import { ContactService } from '../../../core/services/contact.service';
-
+import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { SmsRecommenderService, Suggestion } from '../../../core/services/sms-recommender.service';
 @Component({
   selector: 'app-campaign-form',
   standalone: true,
@@ -17,7 +18,7 @@ import { ContactService } from '../../../core/services/contact.service';
   templateUrl: './campaign-form.component.html',
   styleUrl: './campaign-form.component.scss'
 })
-export class CampaignFormComponent implements OnInit {
+export class CampaignFormComponent implements OnInit, OnDestroy {
   private fb              = inject(FormBuilder);
   private campaignService = inject(CampaignService);
   private templateService = inject(MessageTemplateService);
@@ -25,6 +26,7 @@ export class CampaignFormComponent implements OnInit {
   private router          = inject(Router);
   private route           = inject(ActivatedRoute);
   private contactService  = inject(ContactService);
+  private recommender = inject(SmsRecommenderService);
 
   campaignForm!: FormGroup;
   currentStep = signal(1);
@@ -74,6 +76,12 @@ export class CampaignFormComponent implements OnInit {
 
   // ── Fenêtre optimale sélectionnée par l'utilisateur dans les cards
   selectedOptimalWindow = signal<string>('');
+  // ── Autocomplétion ──
+suggestions      = signal<Suggestion[]>([]);
+showSuggestions  = signal(false);
+detectedLang     = signal<'ar' | 'fr'>('fr');
+private lastPartialText = '';
+private docClickHandler = (e: Event) => this.onDocumentClick(e);
 
   // ══════════════════════════════════════════════════════════
   // LIFECYCLE
@@ -89,7 +97,6 @@ export class CampaignFormComponent implements OnInit {
     this.campaignForm.get('groupId')?.valueChanges.subscribe(() => this.updateAudience());
     this.campaignForm.get('tags')?.valueChanges.subscribe(() => this.updateAudience());
 
-    // Relancer la prédiction si sendingWindow, startDate ou endDate changent
     ['sendingWindow', 'startDate', 'endDate'].forEach(field => {
       this.campaignForm.get(field)?.valueChanges.subscribe(() => {
         if (this.predictedRate() !== null) {
@@ -97,6 +104,42 @@ export class CampaignFormComponent implements OnInit {
         }
       });
     });
+
+    // ── Autocomplétion ML sur le message ──
+    document.addEventListener('click', this.docClickHandler);
+
+    this.campaignForm.get('messageTemplate')?.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(text => {
+      this.detectedLang.set(/[\u0600-\u06FF]/.test(text || '') ? 'ar' : 'fr');
+
+      if (text && text.trim().length >= 2) {
+        this.lastPartialText = text;
+        this.recommender.recommend(text, 5).subscribe({
+          next: (res) => {
+            this.suggestions.set(res.suggestions);
+            this.showSuggestions.set(res.suggestions.length > 0);
+          },
+          error: () => {
+            this.suggestions.set([]);
+            this.showSuggestions.set(false);
+          }
+        });
+      } else {
+        this.suggestions.set([]);
+        this.showSuggestions.set(false);
+      }
+    });
+  }
+  ngOnDestroy() {
+    document.removeEventListener('click', this.docClickHandler);
+  }
+   private onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.sms-editor-wrapper')) {
+      this.showSuggestions.set(false);
+    }
   }
 
   // ══════════════════════════════════════════════════════════
@@ -196,6 +239,38 @@ export class CampaignFormComponent implements OnInit {
     this.pageCount.set(Math.ceil(msg.length / (arabic ? 70 : 160)) || 1);
   }
 
+  // ── AJOUTE ICI les deux nouvelles méthodes ──
+
+  selectSuggestion(suggestion: Suggestion) {
+    const current = this.campaignForm.get('messageTemplate')?.value || '';
+    const words   = current.split(' ');
+
+    if (!current.endsWith(' ')) {
+      words[words.length - 1] = suggestion.word;
+    } else {
+      words.push(suggestion.word);
+    }
+
+    const updated = words.join(' ') + ' ';
+    this.campaignForm.patchValue({ messageTemplate: updated });
+    this.showSuggestions.set(false);
+    this.suggestions.set([]);
+    this.updateCharCount();
+
+    this.recommender.recordFeedback(this.lastPartialText, suggestion.word);
+
+    setTimeout(() => {
+      const ta = document.querySelector('textarea[formControlName="messageTemplate"]') as HTMLTextAreaElement;
+      if (ta) {
+        ta.focus();
+        ta.setSelectionRange(ta.value.length, ta.value.length);
+      }
+    }, 0);
+  }
+
+  hideSuggestions() {
+    setTimeout(() => this.showSuggestions.set(false), 150);
+  }
   // ══════════════════════════════════════════════════════════
   // CONTACTS
   // ══════════════════════════════════════════════════════════
@@ -352,6 +427,7 @@ export class CampaignFormComponent implements OnInit {
     const startDate     = this.campaignForm.get('startDate')?.value;
     const endDate       = this.campaignForm.get('endDate')?.value;
     const sendingWindow = this.campaignForm.get('sendingWindow')?.value || 'ALL_DAY';
+     const campaignType  = this.campaignForm.get('type')?.value || 'CLASSIC';   // ← AJOUTÉ
 
     if (!message || message.length < 10) {
       this.predictionError.set("Veuillez entrer un message d'au moins 10 caractères.");
@@ -375,7 +451,7 @@ export class CampaignFormComponent implements OnInit {
     this.chosenHourScore.set(null);
     this.topWindows.set([]);
 
-    this.campaignService.predictEngagement({ messageTemplate: message, startDate, endDate, sendingWindow })
+    this.campaignService.predictEngagement({ messageTemplate: message, startDate, endDate, sendingWindow, campaignType,  operateur: 'ORANGE' })
       .subscribe({
         next: (response: any) => {
           const data = response.data || response;
@@ -408,4 +484,5 @@ export class CampaignFormComponent implements OnInit {
         complete: () => this.isPredicting.set(false)
       });
   }
+  
 }

@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class FeatureEngineeringService {
+public class     FeatureEngineeringService {
 
     private static final Map<String, Integer> HOUR_RANGES = Map.of(
             "matin_start", 7,

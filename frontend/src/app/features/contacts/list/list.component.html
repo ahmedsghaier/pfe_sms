@@ -3,7 +3,7 @@
   <div class="header">
     <h1>Carnet d'adresse</h1>
     <div class="actions">
-      <button class="btn btn-primary" (click)="showAddForm.set(true)">
+      <button class="btn btn-primary" (click)="editingContact.set(null); showAddForm.set(true)">
         <span class="material-icons">add</span>
         Ajouter un contact
       </button>
@@ -16,29 +16,62 @@
 
   <!-- Search Bar -->
   <div class="search-bar">
-    <input 
-      type="text" 
-      placeholder="Rechercher par téléphone, nom, prénom ou email..."
-      [value]="searchQuery()"
-      (input)="onSearch($any($event.target).value)"
-      class="search-input"
-    />
+    <div class="search-input-wrapper">
+      <span class="material-icons search-icon">search</span>
+      <input
+        type="text"
+        placeholder="Rechercher par téléphone, nom, prénom ou email..."
+        [value]="searchQuery()"
+        (input)="onSearch($any($event.target).value)"
+        class="search-input"
+      />
+    </div>
     @if (selectedContacts().size > 0) {
       <button class="btn btn-danger" (click)="deleteSelected()">
         <span class="material-icons">delete</span>
-        Supprimer ({{selectedContacts().size}})
+        Supprimer ({{ selectedContacts().size }})
       </button>
     }
   </div>
 
-  <!-- Loading State -->
-  @if (loading()) {
-    <div class="loading">Chargement...</div>
-  }
-
   <!-- Error State -->
   @if (error()) {
-    <div class="error-message">{{ error() }}</div>
+    <div class="error-message">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Loading Skeleton -->
+  @if (loading()) {
+    <div class="table-container">
+      <table class="contacts-table">
+        <thead>
+          <tr>
+            <th class="col-checkbox"><input type="checkbox" disabled /></th>
+            <th>Contact</th>
+            <th>Téléphone</th>
+            <th>Email</th>
+            <th>Tags</th>
+            <th>Date d'ajout</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of skeletonRows; track i) {
+            <tr class="skeleton-row">
+              <td><div class="skeleton skeleton-checkbox"></div></td>
+              <td><div class="skeleton skeleton-text" style="width: 75%"></div></td>
+              <td><div class="skeleton skeleton-text" style="width: 60%"></div></td>
+              <td><div class="skeleton skeleton-text" style="width: 80%"></div></td>
+              <td><div class="skeleton skeleton-tag"></div></td>
+              <td><div class="skeleton skeleton-text" style="width: 55%"></div></td>
+              <td><div class="skeleton skeleton-actions"></div></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 
   <!-- Contacts Table -->
@@ -47,44 +80,69 @@
       <table class="contacts-table">
         <thead>
           <tr>
-            <th><input type="checkbox" /></th>
+            <th class="col-checkbox">
+              <input
+                type="checkbox"
+                [checked]="allSelected()"
+                [indeterminate]="someSelected()"
+                (change)="toggleSelectAll()"
+              />
+            </th>
+            <th>Contact</th>
             <th>Téléphone</th>
-            <th>Nom</th>
-            <th>Prénom</th>
             <th>Email</th>
             <th>Tags</th>
             <th>Date d'ajout</th>
-            <th>Actions</th>
+            <th class="col-actions">Actions</th>
           </tr>
         </thead>
         <tbody>
           @for (contact of contacts(); track contact.id) {
-            <tr>
-              <td>
-                <input 
-                  type="checkbox" 
+            <tr
+              [class.selected-row]="selectedContacts().has(contact.id!)"
+              (click)="viewContact(contact)"
+            >
+              <td (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
                   [checked]="selectedContacts().has(contact.id!)"
                   (change)="toggleContactSelection(contact.id!)"
                 />
               </td>
-              <td>{{ contact.phone }}</td>
-              <td>{{ contact.lastName || '-' }}</td>
-              <td>{{ contact.firstName || '-' }}</td>
-              <td>{{ contact.email || '-' }}</td>
               <td>
+                <div class="contact-name-cell">
+                  <div class="avatar">{{ initials(contact) }}</div>
+                  <div class="contact-name-text">
+                    <span class="contact-full-name">
+                      {{ contact.firstName || '-' }} {{ contact.lastName || '' }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td class="phone-cell">{{ contact.phone | phoneFormat }}</td>
+              <td>
+                @if (contact.email) {
+                  <span class="email-cell">{{ contact.email }}</span>
+                } @else {
+                  <span class="empty-value">-</span>
+                }
+              </td>
+              <td class="tags-cell">
                 @for (tag of contact.tags; track tag) {
-                  <span class="tag">{{ tag }}</span>
+                  <span class="tag" [attr.data-tag]="tag">{{ tag }}</span>
+                } @empty {
+                  <span class="empty-value">-</span>
                 }
               </td>
               <td>{{ contact.createdAt | date:'dd/MM/yyyy' }}</td>
-              <td>
-                <button class="btn-icon" title="Modifier">
+              <td class="actions-cell" (click)="$event.stopPropagation()">
+                <button class="btn-icon" title="Modifier" (click)="editContact(contact)">
                   <span class="material-icons">edit</span>
                 </button>
-                <button class="btn-icon" title="Voir">
+                <button class="btn-icon" title="Voir" (click)="viewContact(contact)">
                   <span class="material-icons">visibility</span>
                 </button>
-                <button class="btn-icon text-danger" title="Supprimer">
+                <button class="btn-icon text-danger" title="Supprimer" (click)="deleteOne(contact.id!)">
                   <span class="material-icons">delete</span>
                 </button>
               </td>
@@ -96,19 +154,28 @@
 
     <!-- Pagination -->
     <div class="pagination">
-      <button 
-        [disabled]="currentPage() === 0"
-        (click)="onPageChange(currentPage() - 1)"
-      >
-        Précédent
-      </button>
-      <span>Page {{ currentPage() + 1 }} sur {{ totalPages() }}</span>
-      <button 
-        [disabled]="currentPage() >= totalPages() - 1"
-        (click)="onPageChange(currentPage() + 1)"
-      >
-        Suivant
-      </button>
+      <span class="pagination-info">
+        {{ totalElements() }} contact{{ totalElements() > 1 ? 's' : '' }} au total
+      </span>
+      <div class="pagination-controls">
+        <button
+          class="btn-page"
+          [disabled]="currentPage() === 0"
+          (click)="onPageChange(currentPage() - 1)"
+        >
+          <span class="material-icons">chevron_left</span>
+          Précédent
+        </button>
+        <span class="page-indicator">Page {{ currentPage() + 1 }} sur {{ totalPages() || 1 }}</span>
+        <button
+          class="btn-page"
+          [disabled]="currentPage() >= totalPages() - 1"
+          (click)="onPageChange(currentPage() + 1)"
+        >
+          Suivant
+          <span class="material-icons">chevron_right</span>
+        </button>
+      </div>
     </div>
   }
 
@@ -116,23 +183,37 @@
   @if (!loading() && contacts().length === 0) {
     <div class="empty-state">
       <span class="material-icons">contacts</span>
-      <p>Aucun contact trouvé</p>
-      <button class="btn btn-primary" (click)="showAddForm.set(true)">
-        Ajouter votre premier contact
-      </button>
+      @if (searchQuery()) {
+        <p>Aucun résultat pour « {{ searchQuery() }} »</p>
+      } @else {
+        <p>Aucun contact trouvé</p>
+        <button class="btn btn-primary" (click)="showAddForm.set(true)">
+          Ajouter votre premier contact
+        </button>
+      }
     </div>
   }
 
-  <!-- Modals -->
+  <!-- Modale de visualisation -->
+  @if (viewingContact()) {
+    <app-contact-view
+      [contact]="viewingContact()!"
+      (closed)="viewingContact.set(null)"
+      (editRequested)="onEditFromView($event)"
+      (deleteRequested)="onDeleteFromView($event)"
+    />
+  }
+
+  <!-- Modale d'ajout / édition -->
   @if (showAddForm()) {
-    <app-contact-form 
+    <app-contact-form
       (contactCreated)="onContactCreated()"
-      (cancelled)="showAddForm.set(false)"
+      (cancelled)="onFormCancelled()"
     />
   }
 
   @if (showImportForm()) {
-    <app-contact-import 
+    <app-contact-import
       (imported)="onContactsImported()"
       (cancelled)="showImportForm.set(false)"
     />

@@ -20,6 +20,8 @@ export interface EngagementPredictionPayload {
   startDate?:      string;
   endDate?:        string;
   sendingWindow?:  'ALL_DAY' | 'BUSINESS_HOURS' | 'EVENING';
+  campaignType?:   string;
+  operateur?:      string;
 }
 
 // ── Réponse du backend — tous les champs ML sont nullable ───────────────────
@@ -101,16 +103,18 @@ export class CampaignService {
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/${id}/logs`, { headers: this.getHeaders(), params });
   }
 
-  predictEngagement(payload: EngagementPredictionPayload): Observable<ApiResponse<EngagementPredictionResponse>> {
-    return this.http.post<ApiResponse<EngagementPredictionResponse>>(
-      `${this.apiUrl}/predict-engagement`,
-      {
-        messageTemplate: payload.messageTemplate,
-        startDate:       payload.startDate   ?? null,
-        endDate:         payload.endDate     ?? null,
-        sendingWindow:   payload.sendingWindow ?? 'ALL_DAY'
-      },
-      { headers: this.getHeaders() }
-    );
-  }
+predictEngagement(payload: EngagementPredictionPayload): Observable<ApiResponse<EngagementPredictionResponse>> {
+  return this.http.post<ApiResponse<EngagementPredictionResponse>>(
+    `${this.apiUrl}/predict-engagement`,
+    {
+      messageTemplate: payload.messageTemplate,
+      startDate:       payload.startDate   ?? null,
+      endDate:         payload.endDate     ?? null,
+      sendingWindow:   payload.sendingWindow ?? 'ALL_DAY',
+      campaignType:    payload.campaignType ?? 'CLASSIC',
+      operateur:       payload.operateur    ?? 'ORANGE'
+    },
+    { headers: this.getHeaders() }
+  );
+}
 }

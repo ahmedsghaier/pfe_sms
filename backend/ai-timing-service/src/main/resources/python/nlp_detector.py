@@ -208,7 +208,7 @@ def detect_nlp_type(message):
     if re.search(r'\b(mabrouk|3id|aid|ramadan|bonne année|anniversaire|'
                  r'joyeux|félicitations|bon courage|meilleurs vœux|'
                  r'عيد|رمضان|مبروك)\b', text_raw):
-        return "Vœux", "Marketing"
+        return "Felicitation", "Marketing"
 
     # ── PRIORITÉ 8 : TÉLÉCOM → Information ───────────────────
     # apply_post_corrections() TÉLÉCOM
@@ -239,7 +239,7 @@ if __name__ == "__main__":
     input_file  = sys.argv[1]
     output_file = sys.argv[2]
 
-    with open(input_file, 'r', encoding='utf-8') as f:
+    with open(input_file, 'r', encoding='utf-8-sig') as f:
         data = json.load(f)
 
     message = data.get("message", "")

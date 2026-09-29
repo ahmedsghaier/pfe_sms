@@ -27,7 +27,7 @@ export class SidebarComponent {
     { label: 'Groupes', icon: 'group', route: '/groups' },
     { label: 'Utilisateurs', icon: 'person', route: '/users' },
     { label: 'Campagnes', icon: 'campaign', route: '/campaigns' },
-    { label: 'Modèles Messages', icon: 'message', route: '/templates' },
+    { label: 'Modèles Messages', icon: 'message', route: '/message-templates' },
     { label: 'Paramétrage', icon: 'settings', route: '/settings' },
   ];
 

@@ -104,64 +104,122 @@
 <!-- ═══ CREATE / EDIT MODAL ═══ -->
 <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
   <div class="modal" (click)="$event.stopPropagation()">
+
     <div class="modal-header">
       <h2>{{ editingTemplate ? 'Modifier le modèle' : 'Nouveau modèle' }}</h2>
       <button class="modal-close" (click)="closeModal()">✕</button>
     </div>
 
     <div class="modal-body">
+
+      <!-- Nom -->
       <div class="form-group">
         <label class="form-label">Nom du modèle <span class="required-star">*</span></label>
-        <input type="text" class="form-control" [(ngModel)]="modalForm.libelle" placeholder="Ex : Bienvenue client">
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="modalForm.libelle"
+          placeholder="Ex : Bienvenue client"
+        />
       </div>
 
+      <!-- Type -->
       <div class="form-group">
         <label class="form-label">Type <span class="required-star">*</span></label>
         <div class="type-toggle">
-          <button type="button" class="type-toggle-btn" [class.active]="modalForm.type === 'CLASSIC'" (click)="modalForm.type = 'CLASSIC'">
+          <button
+            type="button"
+            class="type-toggle-btn"
+            [class.active]="modalForm.type === 'CLASSIC'"
+            (click)="modalForm.type = 'CLASSIC'"
+          >
             📤 Classique
           </button>
-          <button type="button" class="type-toggle-btn" [class.active]="modalForm.type === 'TRANSACTIONAL'" (click)="modalForm.type = 'TRANSACTIONAL'">
+          <button
+            type="button"
+            class="type-toggle-btn"
+            [class.active]="modalForm.type === 'TRANSACTIONAL'"
+            (click)="modalForm.type = 'TRANSACTIONAL'"
+          >
             ⚡ Transactionnelle
           </button>
         </div>
       </div>
 
+      <!-- Message + Autocomplétion -->
       <div class="form-group">
-        <label class="form-label">Message <span class="required-star">*</span></label>
-        <div class="message-editor-wrapper">
+        <label class="form-label">
+          Message <span class="required-star">*</span>
+          <!-- Indicateur langue détectée -->
+          <span class="lang-badge" *ngIf="modalForm.message">
+            {{ detectedLang === 'ar' ? '🇹🇳 Arabe' : detectedLang === 'en' ? '🇬🇧 Anglais' : '🇫🇷 Français' }}
+          </span>
+        </label>
+
+        <!-- Wrapper positionné pour le dropdown -->
+        <div class="sms-editor-wrapper">
+
           <textarea
             class="form-control message-textarea"
             rows="6"
-            [(ngModel)]="modalForm.message"
-            (input)="updateModalCharCount()"
+            dir="auto"
+            [value]="modalForm.message"
+            (input)="onMessageInput($event)"
+            (blur)="hideSuggestions()"
             placeholder="Rédigez votre message…"
           ></textarea>
-          <div class="message-toolbar">
-            <div class="variables-group" *ngIf="modalForm.type === 'CLASSIC'">
-              <span class="variables-label">Insérer :</span>
-              <button type="button" class="btn-variable" (click)="insertModalVariable('nom')">&#64;nom</button>
-              <button type="button" class="btn-variable" (click)="insertModalVariable('prenom')">&#64;prenom</button>
-              <button type="button" class="btn-variable" (click)="insertModalVariable('email')">&#64;email</button>
-              <button type="button" class="btn-variable" (click)="insertModalVariable('telephone')">&#64;telephone</button>
+
+          <!-- Suggestions dropdown (apparaît AU-DESSUS du textarea) -->
+          <div class="suggestions-dropdown" *ngIf="showSuggestions && suggestions.length > 0">
+            <div class="suggestions-header">
+              <span>💡 Suggestions</span>
+              <button class="suggestions-close" (click)="hideSuggestions()">✕</button>
             </div>
-            <div class="char-counter">
-              <div class="char-pill" [class.warn]="modalCharCount > 140" [class.danger]="modalCharCount > 160">
-                {{ modalCharCount }} car.
-              </div>
-              <div class="page-pill">{{ modalPageCount }} page(s)</div>
+            <div
+              class="suggestion-item"
+              *ngFor="let s of suggestions"
+              (mousedown)="selectSuggestion(s)"
+            >
+              <span class="suggestion-word">{{ s.word }}</span>
+              <span class="suggestion-score">{{ (s.score * 100).toFixed(0) }}%</span>
             </div>
           </div>
+
         </div>
+
+        <!-- Toolbar : variables + compteur -->
+        <div class="message-toolbar">
+          <div class="variables-group" *ngIf="modalForm.type === 'CLASSIC'">
+            <span class="variables-label">Insérer :</span>
+            <button type="button" class="btn-variable" (click)="insertModalVariable('nom')">&#64;nom</button>
+            <button type="button" class="btn-variable" (click)="insertModalVariable('prenom')">&#64;prenom</button>
+            <button type="button" class="btn-variable" (click)="insertModalVariable('email')">&#64;email</button>
+            <button type="button" class="btn-variable" (click)="insertModalVariable('telephone')">&#64;telephone</button>
+          </div>
+          <div class="char-counter">
+            <div class="char-pill"
+                 [class.warn]="modalCharCount > 140"
+                 [class.danger]="modalCharCount > 160">
+              {{ modalCharCount }} car.
+            </div>
+            <div class="page-pill">{{ modalPageCount }} page(s)</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
     <div class="modal-footer">
       <button class="btn-secondary" (click)="closeModal()">Annuler</button>
-      <button class="btn-primary" (click)="saveTemplate()" [disabled]="!isModalValid() || isSaving">
+      <button
+        class="btn-primary"
+        (click)="saveTemplate()"
+        [disabled]="!isModalValid() || isSaving"
+      >
         <span class="spinner" *ngIf="isSaving"></span>
         {{ isSaving ? 'Enregistrement…' : (editingTemplate ? 'Mettre à jour' : 'Créer le modèle') }}
       </button>
     </div>
+
   </div>
 </div>

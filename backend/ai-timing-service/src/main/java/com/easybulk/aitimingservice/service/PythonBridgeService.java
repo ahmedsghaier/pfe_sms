@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -21,6 +22,23 @@ public class PythonBridgeService {
 
     private final ObjectMapper objectMapper;
     private List<Map<String, Object>> timingResults;
+
+    // ── Injectés depuis application.properties ─────────────────────────
+    // ai-timing.python.executable=${PYTHON_PATH:/usr/bin/python3}
+    @Value("${ai-timing.python.executable:/usr/bin/python3}")
+    private String pythonExecutable;
+
+    // Le script-path existant (ai-timing.python.script-path) pointe vers
+    // prediction_engine.py (entraînement). nlp_detector.py vit dans le même
+    // dossier /app/python/ — on dérive donc son chemin plutôt que de dupliquer
+    // une propriété. Si vous préférez l'externaliser, ajoutez :
+    //   ai-timing.python.nlp-detector-path=/app/python/nlp_detector.py
+    // et remplacez la valeur par défaut ci-dessous par @Value(...).
+    @Value("${ai-timing.python.nlp-detector-path:/app/python/nlp_detector.py}")
+    private String nlpDetectorScriptPath;
+
+    @Value("${ai-timing.python.timeout:30000}")
+    private long pythonTimeoutMs;
 
     public PythonBridgeService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -65,7 +83,7 @@ public class PythonBridgeService {
                                        String nlpType,
                                        FeatureVector features) {
 
-        // Détecter le type NLP via le modèle Python léger
+        // Détecter le type NLP via le modèle Python léger (nlp_detector.py)
         String detectedType = detectNlpViaModel(features);
 
         log.info("NLP détecté par modèle: {} pour message: '{}'",
@@ -101,19 +119,20 @@ public class PythonBridgeService {
                     w.write(inputJson);
                 }
 
-                // ✅ utiliser la variable Spring
-                File pythonExecutable = null;
+                // ✅ exécutable Python injecté depuis application.properties
+                // (ai-timing.python.executable, ex: /usr/bin/python3)
                 CommandLine cmd = new CommandLine(pythonExecutable);
 
-                cmd.addArgument("/app/python/nlp_detector.py");
+                cmd.addArgument(nlpDetectorScriptPath);
                 cmd.addArgument(tempInput.getAbsolutePath());
                 cmd.addArgument(tempOutput.getAbsolutePath());
 
                 DefaultExecutor executor = new DefaultExecutor();
 
-                executor.setWatchdog(new ExecuteWatchdog(10_000));
+                executor.setWatchdog(new ExecuteWatchdog(pythonTimeoutMs));
 
-                executor.execute(cmd);
+                int exitCode = executor.execute(cmd);
+                log.debug("nlp_detector.py exit code: {}", exitCode);
 
                 String result = new String(
                         Files.readAllBytes(tempOutput.toPath())
@@ -121,6 +140,11 @@ public class PythonBridgeService {
 
                 Map<String, Object> parsed =
                         objectMapper.readValue(result, Map.class);
+
+                if (parsed.containsKey("error")) {
+                    log.warn("nlp_detector.py a retourné une erreur: {}", parsed.get("error"));
+                    return detectFromRules(message);
+                }
 
                 return (String) parsed.getOrDefault(
                         "nlp_type",
@@ -143,6 +167,7 @@ public class PythonBridgeService {
             return detectFromRules(features.getMessage());
         }
     }
+
     private String detectFromRules(String message) {
         if (message == null) return "Information";
         String low = message.toLowerCase();
@@ -213,6 +238,7 @@ public class PythonBridgeService {
 
         // Structure EXACTE attendue par TimingPredictionService.buildResponse()
         Map<String, Object> result = new HashMap<>();
+        result.put("nlp_type", nlpType);   // ← AJOUTÉ : propage le vrai type détecté jusqu'au metadata final
         result.put("best_hour", bestHour);
         result.put("hybrid_score_peak", hybridScore);
         result.put("predicted_engagement_rate", Math.round(engagementRate * 10.0) / 10.0);

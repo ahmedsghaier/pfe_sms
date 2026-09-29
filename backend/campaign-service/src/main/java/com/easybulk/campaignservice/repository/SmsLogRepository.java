@@ -17,4 +17,5 @@ public interface SmsLogRepository extends MongoRepository<SmsLog, String> {
     long countByCampaignIdAndStatus(String campaignId, SmsLog.SmsStatus status);
 
     List<SmsLog> findByCampaignIdAndStatus(String campaignId, SmsLog.SmsStatus status);
+
 }

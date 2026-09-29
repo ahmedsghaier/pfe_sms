@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
-import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-home',
   standalone: true,
-  imports: [SidebarComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent {}
+export class HomeComponent {
+  private readonly chartBase = `${environment.apiUrl}/v1/model-results/chart`;
+
+  hourlyCurveUrl = `${this.chartBase}/hourly_curve_by_type`;
+  engagementTierUrl = `${this.chartBase}/engagement_by_tier`;
+}

@@ -44,15 +44,15 @@ RUN pip3 install --no-cache-dir \
     catboost==1.2.5 \
     joblib==1.4.2 \
     scipy==1.13.0 \
-    seaborn==0.13.2
+    seaborn==0.13.2 \
+    matplotlib==3.9.0
 
 # Copy JAR
 COPY --from=builder /build/target/*.jar app.jar
 
 # Create folders
-RUN mkdir -p /app/models /app/python /app/python/mongodb_synthetic /app/logs && \
+RUN mkdir -p /app/models /app/python /app/python/mongodb_synthetic /app/logs /app/models/charts && \
     chown -R spring:spring /app
-
 # Copy python + models + dataset
 COPY --chown=spring:spring src/main/resources/python /app/python
 COPY --chown=spring:spring src/main/resources/models /app/models

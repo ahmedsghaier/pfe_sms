@@ -111,15 +111,33 @@
 
         <div class="form-group">
           <label class="form-label">Message <span class="required-star">*</span></label>
-          <div class="message-editor-wrapper">
+          <div class="message-editor-wrapper sms-editor-wrapper">
             <textarea
               formControlName="messageTemplate"
               class="form-control message-textarea"
               rows="6"
+              dir="auto"
               placeholder="Rédigez votre message SMS ici…"
               (input)="updateCharCount()"
+              (blur)="hideSuggestions()"
               [class.is-invalid]="campaignForm.get('messageTemplate')?.invalid && campaignForm.get('messageTemplate')?.touched"
             ></textarea>
+
+            <!-- Suggestions dropdown -->
+            <div class="suggestions-dropdown" *ngIf="showSuggestions() && suggestions().length > 0">
+              <div class="suggestions-header">
+                <span>💡 Suggestions</span>
+                <button type="button" class="suggestions-close" (click)="showSuggestions.set(false)">✕</button>
+              </div>
+              <div
+                class="suggestion-item"
+                *ngFor="let s of suggestions()"
+                (mousedown)="selectSuggestion(s)"
+              >
+                <span class="suggestion-word">{{ s.word }}</span>
+                <span class="suggestion-score">{{ (s.score * 100).toFixed(0) }}%</span>
+              </div>
+            </div>
 
             <div class="message-toolbar">
               <div class="variables-group" *ngIf="campaignForm.get('type')?.value === 'CLASSIC'">
